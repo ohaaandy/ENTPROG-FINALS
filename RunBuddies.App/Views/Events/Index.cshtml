@@ -1,0 +1,32 @@
+﻿@model IEnumerable<RunBuddies.ViewModels.EventViewModel>
+@{
+    ViewData["Title"] = "Events";
+}
+
+<h1>LOREM IPSUM</h1>
+<p>lorem ipsum dolor sit amet, consectetur adipiscing elit, pellentesque quis aliquet massa. mauris finibus nunc sit amet lacinia varius. nullam accumsan vehicula lectus et congue.</p>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Event</a>
+</p>
+
+<div class="event-grid">
+   @*  @foreach (var item in Model.Take(6))
+    {
+        <div class="event-item">
+            <div class="image-placeholder">
+                <img src="@item.ImageUrl" alt="@item.EventName" /> 
+            </div>
+            <p>@item.EventName</p>
+        </div>
+    } *@ 
+    @for (int i = 1; i <= 6; i++)
+    {
+        <div class="event-item">
+            <div class="image-placeholder">
+                <img src="/path/to/placeholder-image.jpg" alt="Event Image Placeholder" />
+            </div>
+            <p>event #@i</p>
+        </div>
+    }
+</div>

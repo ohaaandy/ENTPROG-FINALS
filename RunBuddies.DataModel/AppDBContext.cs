@@ -7,8 +7,68 @@ using System.Threading.Tasks;
 
 namespace RunBuddies.DataModel
 {
-    internal class AppDBContext : DbContext
+    public class AppDBContext : DbContext
     {
+        public AppDBContext(DbContextOptions<AppDBContext> options)
+        : base(options)
+        {
+        }
+        public void SeedSampleData()
+        {
+            if (!Users.Any())
+            {
+                Users.AddRange(
+                    new User
+                    {
+                        FirstName = "John",
+                        LastName = "Doe",
+                        RunnerLevel = "Beginner",
+                        Location = "Manila",
+                        Schedule = new DateOnly(2023, 1, 2) // Monday
+                    },
+                    new User
+                    {
+                        FirstName = "Jane",
+                        LastName = "Smith",
+                        RunnerLevel = "Intermediate",
+                        Location = "Quezon City",
+                        Schedule = new DateOnly(2023, 1, 3) // Tuesday
+                    },
+                    new User
+                    {
+                        FirstName = "Mike",
+                        LastName = "Johnson",
+                        RunnerLevel = "Advanced",
+                        Location = "Makati",
+                        Schedule = new DateOnly(2023, 1, 5) // Thursday
+                    }
+                );
+            }
+
+            if (!Clubs.Any())
+            {
+                Clubs.AddRange(
+                    new Club
+                    {
+                        ClubName = "Manila Runners",
+                        Location = "Manila",
+                        // You might want to add a Schedule property to the Club model
+                    },
+                    new Club
+                    {
+                        ClubName = "QC Sprinters",
+                        Location = "Quezon City",
+                    },
+                    new Club
+                    {
+                        ClubName = "Makati Marathoners",
+                        Location = "Makati",
+                    }
+                );
+            }
+
+            SaveChanges();
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Andy SQL
@@ -101,14 +161,14 @@ namespace RunBuddies.DataModel
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
-        DbSet<User> Users { get; set; }
-        DbSet<ClubModerator> ClubModerators { get; set; }
-        DbSet<ClubMember> ClubMembers { get; set; }
-        DbSet<Club> Clubs { get; set; }
-        DbSet<Event> Events { get; set; }
-        DbSet<BuddyPartner> BuddyPartners { get; set; }
-        DbSet<Leaderboard> Leaderboards { get; set; }
-        DbSet<Verification> Verifications { get; set; }
-        DbSet<BuddySession> BuddySessions { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<ClubModerator> ClubModerators { get; set; }
+        public DbSet<ClubMember> ClubMembers { get; set; }
+        public DbSet<Club> Clubs { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<BuddyPartner> BuddyPartners { get; set; }
+        public DbSet<Leaderboard> Leaderboards { get; set; }
+        public DbSet<Verification> Verifications { get; set; }
+        public DbSet<BuddySession> BuddySessions { get; set; }
     }
 }

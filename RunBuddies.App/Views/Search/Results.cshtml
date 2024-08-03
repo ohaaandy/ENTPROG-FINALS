@@ -1,0 +1,107 @@
+﻿@model List<SearchResultViewModel>
+
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+<h2>Search Results</h2>
+
+@if (Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Location</th>
+                <th>Schedule</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in Model)
+            {
+                <tr>
+                    <td>@result.Name</td>
+                    <td>@result.Level</td>
+                    <td>@result.Location</td>
+                    <td>@result.Schedule</td>
+                    <td>
+                        <button class="btn btn-primary view-details" data-id="@result.Id" data-type="@result.Type">View Details</button>
+                        @if (result.Type == "Buddy")
+                        {
+                            <button class="btn btn-success invite-buddy" data-id="@result.Id">Invite as Buddy</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success join-club" data-id="@result.Id">Join Club</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No results found. Please try different search criteria.</p>
+}
+
+<div id="detailsModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="detailsContent">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.view-details').click(function () {
+                var id = $(this).data('id');
+                var type = $(this).data('type');
+                $.ajax({
+                    url: '@Url.Action("GetDetails", "Search")',
+                    type: 'GET',
+                    data: { id: id, type: type },
+                    success: function (result) {
+                        $('#detailsContent').html(result);
+                        $('#detailsModal').modal('show');
+                    }
+                });
+            });
+
+            $('.invite-buddy').click(function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: '@Url.Action("InviteBuddy", "Search")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (result) {
+                        alert(result.message);
+                    }
+                });
+            });
+
+            $('.join-club').click(function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: '@Url.Action("JoinClub", "Search")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (result) {
+                        alert(result.message);
+                    }
+                });
+            });
+        });
+    </script>
+}

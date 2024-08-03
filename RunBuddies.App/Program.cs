@@ -1,4 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using RunBuddies.DataModel;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDBContext>(opts =>
+{
+    opts.UseSqlServer(builder.Configuration.GetConnectionString("Yash"));
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
