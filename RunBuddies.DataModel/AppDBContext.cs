@@ -12,15 +12,17 @@ namespace RunBuddies.DataModel
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Andy SQL
-            optionsBuilder.UseSqlServer(
-                "server=APOL\\SQLEXPRESS;" +
-                "database=RunBuddies;" +
-                "integrated security=SSPI;" +
-                "trustservercertificate=true");
+            //optionsBuilder.UseSqlServer(
+            //    "server=APOL\\SQLEXPRESS;" +
+            //    "database=RunBuddies;" +
+            //    "integrated security=SSPI;" +
+            //    "trustservercertificate=true");
 
             //Monty SQL
 
             //Yash SQL
+            optionsBuilder.UseSqlServer("server=LAPTOP-A7QL1S73\\SQLEXPRESS;Database=ENTPROG_Finals;integrated security=sspi;trustservercertificate=true");
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
