@@ -1,0 +1,63 @@
+﻿@model SignInViewModel
+
+<div class="col-4 offset-4">
+
+    <div class="card text-dark border-dark mb-3" style="max-width: 30rem;">
+
+        <div class="card-body">
+
+            <h4 class="card-title">
+                
+                <i class="fa-solid fa-user"></i>
+                Account Log-In
+                
+            </h4>
+
+            <div style="text-align: center">
+            </div>
+
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <form asp-controller="Profile" asp-action="SignIn" method="post" asp-route-returnUrl="@Model.ReturnUrl">
+
+                <label asp-for="UserName">Username</label>
+                <input asp-for="UserName" class="form-control" />
+               
+                <br /><br />
+
+                <label asp-for="Password">Password</label>
+                <input type="password" input asp-for="Password" class="form-control" />
+               
+                <br />
+
+                <div style="text-align: right">
+                    
+                    <button type="submit" class="btn btn-primary">
+
+                        Log-In
+
+                        <i class="fa-solid fa-right-to-bracket"></i>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+            <hr />
+
+            <h4 class="card-title">Don't Have an Account?</h4>
+
+            <a asp-controller="Profile" asp-action="Register"
+               class="btn btn-info">
+
+                <i class="fa fa-user-plus"></i>
+                Sign-Up Here
+            
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

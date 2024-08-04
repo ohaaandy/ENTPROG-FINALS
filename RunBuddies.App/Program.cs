@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RunBuddies.App.Automapper;
 using RunBuddies.DataModel;
 
 namespace RunBuddies.App
@@ -19,7 +20,7 @@ namespace RunBuddies.App
 
             ////Add Service to use the AutoMapper
 
-            //builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+            builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
             ////Add Service for the Repository
 

@@ -10,10 +10,10 @@ namespace RunBuddies.DataModel
 {
     public class AppDBContext : IdentityDbContext<User>
     {
-        //public AppDBContext(DbContextOptions options) : base(options)
-        //{
+        public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
+        {
 
-        //}
+        }
 
         public void SeedSampleData()
         {
@@ -29,7 +29,7 @@ namespace RunBuddies.DataModel
                         LastName = "Doe",
                         Birthday = new DateOnly(1990, 1, 1),
                         Gender = "Male",
-                        ContactNumber = 1234567890,
+                        PhoneNumber = "1234567890",
                         RunnerLevel = "Beginner",
                         Schedule = new DateOnly(2023, 1, 2), // This represents Monday
                         Location = "Manila",
@@ -44,7 +44,7 @@ namespace RunBuddies.DataModel
                         LastName = "Smith",
                         Birthday = new DateOnly(1992, 5, 15),
                         Gender = "Female",
-                        ContactNumber = 1234567890,
+                        PhoneNumber = "1234567890",
                         RunnerLevel = "Intermediate",
                         Schedule = new DateOnly(2023, 1, 4), // This represents Wednesday
                         Location = "Quezon City",
@@ -59,7 +59,7 @@ namespace RunBuddies.DataModel
                         LastName = "Johnson",
                         Birthday = new DateOnly(1988, 9, 30),
                         Gender = "Male",
-                        ContactNumber = 1234567890,
+                        PhoneNumber = "1234567890",
                         RunnerLevel = "Advanced",
                         Schedule = new DateOnly(2023, 1, 7), // This represents Saturday
                         Location = "Makati",

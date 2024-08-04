@@ -46,7 +46,7 @@ namespace RunBuddies.App.Controllers
                 if (!string.IsNullOrEmpty(location))
                     query = query.Where(u => u.Location == location);
                 if (daysList.Any())
-                    query = query.Where(u => daysList.Contains(u.Schedule.DayOfWeek));
+                    query = query.Where(u => daysList.Contains(u.Schedule.Value.DayOfWeek));
 
                 var debugResults = query.ToList();  // Materialize the query for debugging
                 foreach (var user in debugResults)
@@ -60,8 +60,8 @@ namespace RunBuddies.App.Controllers
                     Name = u.FirstName + " " + u.LastName,
                     Level = u.RunnerLevel,
                     Location = u.Location,
-                    Schedule = u.Schedule.DayOfWeek.ToString(),
-                    Distance = u.Distance,  // Show the user's actual distance
+                    Schedule = u.Schedule.Value.DayOfWeek.ToString(),
+                    Distance = (int)u.Distance,  // Show the user's actual distance
                     Type = "Buddy"
                 }).ToList();
             }
@@ -138,7 +138,7 @@ namespace RunBuddies.App.Controllers
                     query = query.Where(u => u.Location == location);
 
                 if (daysList.Any())
-                    query = query.Where(u => daysList.Contains(u.Schedule.DayOfWeek));
+                    query = query.Where(u => daysList.Contains(u.Schedule.Value.DayOfWeek));
 
                 results = query.Select(u => new SearchResultViewModel
                 {
@@ -146,8 +146,8 @@ namespace RunBuddies.App.Controllers
                     Name = $"{u.FirstName} {u.LastName}",
                     Level = u.RunnerLevel,
                     Location = u.Location,
-                    Schedule = u.Schedule.DayOfWeek.ToString(),
-                    Distance = u.Distance,
+                    Schedule = u.Schedule.Value.DayOfWeek.ToString(),
+                    Distance = (int)u.Distance,
                     Type = "Buddy"
                 }).ToList();
             }

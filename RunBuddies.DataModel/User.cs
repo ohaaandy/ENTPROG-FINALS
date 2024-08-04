@@ -14,14 +14,12 @@ namespace RunBuddies.DataModel
         public string LastName { get; set; }
         public DateOnly Birthday { get; set; }
         public string Gender { get; set; }
-        public int ContactNumber { get; set; }
 
         //Preferences
-        public string RunnerLevel { get; set; }
-        public DateOnly Schedule { get; set; }
-
-        public string Location { get; set; }
-        public int Distance { get; set; }
+        public string? RunnerLevel { get; set; }
+        public DateOnly? Schedule { get; set; }
+        public string? Location { get; set; }
+        public int? Distance { get; set; }
         public ICollection<BuddyInvitation> SentBuddyInvitations { get; set; }
         public ICollection<BuddyInvitation> ReceivedBuddyInvitations { get; set; }
 
