@@ -12,7 +12,7 @@ namespace RunBuddies.DataModel
         [Key]
         public int ClubModeratorID { get; set; }
 
-        public int UserID { get; set; }     //FK
+        public string UserID { get; set; }     //FK
         public User User { get; set; }      //Navigation
 
         public List<Club> Clubs { get; set; } //many to one

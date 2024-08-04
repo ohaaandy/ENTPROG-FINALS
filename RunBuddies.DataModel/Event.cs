@@ -15,7 +15,7 @@ namespace RunBuddies.DataModel
         public int ClubID { get; set; }     //FK
         public Club Club { get; set; }      //Navigation
 
-        public int UserID { get; set; }     //FK
+        public string UserID { get; set; }     //FK
         public User User { get; set; }      //Navigation
 
         public string EventName { get; set; }

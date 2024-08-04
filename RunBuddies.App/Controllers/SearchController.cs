@@ -56,7 +56,7 @@ namespace RunBuddies.App.Controllers
 
                 results = query.Select(u => new SearchResultViewModel
                 {
-                    Id = u.UserID,
+                    Id = u.Id,
                     Name = u.FirstName + " " + u.LastName,
                     Level = u.RunnerLevel,
                     Location = u.Location,
@@ -73,7 +73,7 @@ namespace RunBuddies.App.Controllers
 
                 results = query.Select(c => new SearchResultViewModel
                 {
-                    Id = c.ClubID,
+                    ClubId = c.ClubID,
                     Name = c.ClubName,
                     Level = "N/A",
                     Location = c.Location,
@@ -87,11 +87,11 @@ namespace RunBuddies.App.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetDetails(int id, string type)
+        public IActionResult GetDetails(int id, string uid, string type)
         {
             if (type == "Buddy")
             {
-                var user = _context.Users.FirstOrDefault(u => u.UserID == id);
+                var user = _context.Users.FirstOrDefault(u => u.Id == uid);
                 return PartialView("_UserDetails", user);
             }
             else if (type == "Club")
@@ -142,7 +142,7 @@ namespace RunBuddies.App.Controllers
 
                 results = query.Select(u => new SearchResultViewModel
                 {
-                    Id = u.UserID,
+                    Id = u.Id,
                     Name = $"{u.FirstName} {u.LastName}",
                     Level = u.RunnerLevel,
                     Location = u.Location,

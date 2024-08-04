@@ -26,7 +26,7 @@ namespace RunBuddies.Controllers
                     DateTime = e.DateTime,
                     Location = e.Location,
                     Description = e.Description,
-                    OrganizerName = e.User.Username // Assuming User has a Username property // Add Event image
+                    OrganizerName = e.User.UserName // Assuming User has a Username property // Add Event image
                 })
                 .ToListAsync();
 
@@ -49,7 +49,7 @@ namespace RunBuddies.Controllers
                     DateTime = e.DateTime,
                     Location = e.Location,
                     Description = e.Description,
-                    OrganizerName = e.User.Username,
+                    OrganizerName = e.User.UserName,
                     // You could set HasUserJoined here based on some logic
                 })
                 .FirstOrDefaultAsync();

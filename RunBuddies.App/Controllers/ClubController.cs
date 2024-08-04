@@ -34,7 +34,7 @@ namespace RunBuddies.App.Controllers
                     return Unauthorized("User is not authenticated.");
                 }
 
-                var clubMember = await _context.ClubMembers.SingleOrDefaultAsync(cm => cm.UserID == userId.Value);
+                var clubMember = await _context.ClubMembers.SingleOrDefaultAsync(cm => cm.UserID == userId);
                 if (clubMember == null)
                 {
                     return BadRequest("Club member not found.");
@@ -58,14 +58,14 @@ namespace RunBuddies.App.Controllers
             return View(model);
         }
 
-        private int? GetCurrentUserId()
+        private string? GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
                 throw new InvalidOperationException("User is not authenticated or user ID claim is missing.");
             }
-            return int.Parse(userIdClaim.Value);
+            return (userIdClaim.Value);
         }
     }
 }

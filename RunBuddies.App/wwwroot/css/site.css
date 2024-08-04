@@ -1,63 +1,22 @@
-/* Add your custom styles here */
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
 body {
-    font-family: Arial, sans-serif;
-}
-
-.navbar-header {
-    display: none;
-}
-
-.nav-menu {
-    list-style-type: none;
-    display: flex;
-    justify-content: space-around;
-    padding: 0;
-}
-
-    .nav-menu li {
-        margin: 0 10px;
-    }
-
-.hero-section, .about-section {
-    text-align: center;
-    padding: 20px;
-}
-
-.event-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.event-item {
-    border: 1px solid #000;
-    padding: 10px;
-    text-align: center;
-}
-
-.image-placeholder {
-    background-color: #ccc;
-    height: 150px; /* Adjust as needed */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-    .image-placeholder img {
-        max-width: 100%;
-        max-height: 100%;
-    }
-
-@media (max-width: 768px) {
-    .navbar-header {
-        display: block;
-    }
-
-    .nav-menu {
-        display: none;
-    }
-
-    .event-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  margin-bottom: 60px;
 }

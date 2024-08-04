@@ -1,52 +1,57 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.General;
-using RunBuddies.App.Automapper;
 using RunBuddies.DataModel;
 
-public class Program
+namespace RunBuddies.App
 {
-    public static void Main(string[] args)
+    public class Program
     {
-        var builder = WebApplication.CreateBuilder(args);
-
-        //Add Service to use the Database Context
-        builder.Services.AddDbContext<AppDBContext>(opts =>
+        public static void Main(string[] args)
         {
-            opts.UseSqlServer(builder.Configuration.GetConnectionString("Yash"));
-        });
+            var builder = WebApplication.CreateBuilder(args);
 
-        //Add service to use the Automapper
-        builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+            //Add Service to use the Database Context
 
-        //Add service for the Repository
+            builder.Services.AddDbContext<AppDBContext>(opts =>
+            {
+                opts.UseSqlServer(builder.Configuration.GetConnectionString("Monty"));
+            });
 
-        //Add service for the Microsoft Identity
-        builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
-        {
-            options.Password.RequiredLength = 10;
-            options.Password.RequireDigit = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-        }).AddEntityFrameworkStores<AppDBContext>();
+            ////Add Service to use the AutoMapper
+
+            //builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+
+            ////Add Service for the Repository
+
+            //Add Service for the Microsoft Identity
+
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {   //Configure Authentication Requirements
+                options.Password.RequiredLength = 10;
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+
+                options.SignIn.RequireConfirmedEmail = false;
+            }).AddEntityFrameworkStores<AppDBContext>();
 
         //Configuring Application Cookie
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
             options.LoginPath = "/Profile/SignIn";
             options.LogoutPath = "/Profile/SignOut";
             options.ExpireTimeSpan = TimeSpan.FromHours(1);
-            options.SlidingExpiration = true;
-        });
+                options.SlidingExpiration = true;
+            });
 
-        // Add services to the container.
-        builder.Services.AddControllersWithViews();
+            // Add services to the container.
+            builder.Services.AddControllersWithViews();
 
         // Add services for sessions
         builder.Services.AddSession();
 
-        var app = builder.Build();
+            var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())
         {
@@ -56,28 +61,29 @@ public class Program
             context.SeedSampleData();
         }
 
-        // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Home/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
-        }
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
         app.UseSession();
 
-        app.UseRouting();
+            app.UseRouting();
 
-        app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
         app.UseAuthentication();
 
-        app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
-        app.Run();
+            app.Run();
+        }
     }
 }
-

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RunBuddies.DataModel.Migrations
 {
     /// <inheritdoc />
-    public partial class AddBuddyInvitationSystem : Migration
+    public partial class ADDED_BUDDYINVITATION_TABLE : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,29 +25,7 @@ namespace RunBuddies.DataModel.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BuddyInvitations", x => x.InvitationID);
-                    table.ForeignKey(
-                        name: "FK_BuddyInvitations_Users_ReceiverID",
-                        column: x => x.ReceiverID,
-                        principalTable: "Users",
-                        principalColumn: "UserID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_BuddyInvitations_Users_SenderID",
-                        column: x => x.SenderID,
-                        principalTable: "Users",
-                        principalColumn: "UserID",
-                        onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BuddyInvitations_ReceiverID",
-                table: "BuddyInvitations",
-                column: "ReceiverID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BuddyInvitations_SenderID",
-                table: "BuddyInvitations",
-                column: "SenderID");
         }
 
         /// <inheritdoc />

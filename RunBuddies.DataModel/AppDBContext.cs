@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,13 @@ using System.Threading.Tasks;
 
 namespace RunBuddies.DataModel
 {
-    public class AppDBContext : DbContext
+    public class AppDBContext : IdentityDbContext<User>
     {
-        public AppDBContext(DbContextOptions<AppDBContext> options)
-        : base(options)
-        {
-        }
+        //public AppDBContext(DbContextOptions options) : base(options)
+        //{
+
+        //}
+
         public void SeedSampleData()
         {
             if (!Users.Any())
@@ -20,8 +22,8 @@ namespace RunBuddies.DataModel
                 Users.AddRange(
                     new User
                     {
-                        Username = "john_doe",
-                        Password = "password123", // In a real app, make sure to hash passwords
+                        UserName = "john_doe",
+                        PasswordHash = "password123", // In a real app, make sure to hash passwords
                         Email = "john@example.com",
                         FirstName = "John",
                         LastName = "Doe",
@@ -35,8 +37,8 @@ namespace RunBuddies.DataModel
                     },
                     new User
                     {
-                        Username = "jane_smith",
-                        Password = "password456",
+                        UserName = "jane_smith",
+                        PasswordHash = "password456",
                         Email = "jane@example.com",
                         FirstName = "Jane",
                         LastName = "Smith",
@@ -50,8 +52,8 @@ namespace RunBuddies.DataModel
                     },
                     new User
                     {
-                        Username = "mike_johnson",
-                        Password = "password789",
+                        UserName = "mike_johnson",
+                        PasswordHash = "password789",
                         Email = "mike@example.com",
                         FirstName = "Mike",
                         LastName = "Johnson",
@@ -68,26 +70,17 @@ namespace RunBuddies.DataModel
                 SaveChanges();
             }
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                //Andy SQL
-                //optionsBuilder.UseSqlServer(
-                //    "server=APOL\\SQLEXPRESS;" +
-                //    "database=RunBuddies;" +
-                //    "integrated security=SSPI;" +
-                //    "trustservercertificate=true");
-
                 //Monty SQL
                 optionsBuilder.UseSqlServer(
-                        "Server = ANDREIPC\\SQLEXPRESS;" +
-                        "Database = ENTPROG_XTIS3_Suppliers;" +
-                        "Integrated Security = SSPI;" +
-                        "TrustServerCertificate = true");
-
-                //Yash SQL
-                //optionsBuilder.UseSqlServer("server=LAPTOP-A7QL1S73\\SQLEXPRESS;Database=ENTPROG_Finals;integrated security=sspi;trustservercertificate=true");
+                    "Server = ANDREIPC\\SQLEXPRESS;" +
+                    "Database = ENTPROG_FINALS;" +
+                    "Integrated Security = SSPI;" +
+                    "TrustServerCertificate = true");
             }
         }
 
@@ -179,7 +172,7 @@ namespace RunBuddies.DataModel
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
-        public DbSet<User> Users { get; set; }
+        //public DbSet<User> AspNetUsers { get; set; }
         public DbSet<ClubModerator> ClubModerators { get; set; }
         public DbSet<ClubMember> ClubMembers { get; set; }
         public DbSet<Club> Clubs { get; set; }

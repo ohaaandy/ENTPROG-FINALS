@@ -18,7 +18,7 @@ namespace RunBuddies.App.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendInvitation(int receiverId)
+        public async Task<IActionResult> SendInvitation(string receiverId)
         {
             try
             {
@@ -106,19 +106,19 @@ namespace RunBuddies.App.Controllers
         {
             var userId = GetCurrentUserId();
             var buddies = _context.BuddyPartners
-                .Where(bp => bp.UserID == userId || bp.User.UserID == userId)
+                .Where(bp => bp.UserID == userId || bp.User.Id == userId)
                 .Include(bp => bp.User)
                 .ToList();
 
             return View(buddies);
         }
 
-        private int GetCurrentUserId()//Must be Authenticated to work
+        private string GetCurrentUserId()//Must be Authenticated to work
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim != null)
             {
-                return int.Parse(userIdClaim.Value);
+                return (userIdClaim.Value);
             }
 
             // If the user is not authenticated or the claim is not found, throw an exception

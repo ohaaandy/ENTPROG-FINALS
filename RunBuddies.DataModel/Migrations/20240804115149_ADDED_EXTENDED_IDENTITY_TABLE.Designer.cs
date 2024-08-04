@@ -12,8 +12,8 @@ using RunBuddies.DataModel;
 namespace RunBuddies.DataModel.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240804010415_AddBuddyInvitationSystem")]
-    partial class AddBuddyInvitationSystem
+    [Migration("20240804115149_ADDED_EXTENDED_IDENTITY_TABLE")]
+    partial class ADDED_EXTENDED_IDENTITY_TABLE
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,139 @@ namespace RunBuddies.DataModel.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
 
             modelBuilder.Entity("RunBuddies.DataModel.BuddyInvitation", b =>
                 {
@@ -47,10 +180,6 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasKey("InvitationID");
 
-                    b.HasIndex("ReceiverID");
-
-                    b.HasIndex("SenderID");
-
                     b.ToTable("BuddyInvitations");
                 });
 
@@ -66,8 +195,6 @@ namespace RunBuddies.DataModel.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("BuddyID");
-
-                    b.HasIndex("UserID");
 
                     b.ToTable("BuddyPartners");
                 });
@@ -98,11 +225,6 @@ namespace RunBuddies.DataModel.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("BuddySessionID");
-
-                    b.HasIndex("BuddyID");
-
-                    b.HasIndex("VerificationID")
-                        .IsUnique();
 
                     b.ToTable("BuddySessions");
                 });
@@ -139,10 +261,6 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasKey("ClubID");
 
-                    b.HasIndex("ClubMemberID");
-
-                    b.HasIndex("ClubModeratorID");
-
                     b.ToTable("Clubs");
                 });
 
@@ -159,8 +277,6 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasKey("ClubMemberID");
 
-                    b.HasIndex("UserID");
-
                     b.ToTable("ClubMembers");
                 });
 
@@ -176,8 +292,6 @@ namespace RunBuddies.DataModel.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ClubModeratorID");
-
-                    b.HasIndex("UserID");
 
                     b.ToTable("ClubModerators");
                 });
@@ -220,10 +334,6 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasKey("EventID");
 
-                    b.HasIndex("ClubID");
-
-                    b.HasIndex("UserID");
-
                     b.ToTable("Events");
                 });
 
@@ -246,22 +356,23 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasKey("LeaderboardID");
 
-                    b.HasIndex("EventID")
-                        .IsUnique();
-
                     b.ToTable("Leaderboards");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.User", b =>
                 {
-                    b.Property<int>("UserID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
 
                     b.Property<DateOnly>("Birthday")
                         .HasColumnType("date");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ContactNumber")
                         .HasColumnType("int");
@@ -270,8 +381,11 @@ namespace RunBuddies.DataModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -289,9 +403,28 @@ namespace RunBuddies.DataModel.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("RunnerLevel")
                         .IsRequired()
@@ -300,13 +433,27 @@ namespace RunBuddies.DataModel.Migrations
                     b.Property<DateOnly>("Schedule")
                         .HasColumnType("date");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
+                    b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserID");
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
 
-                    b.ToTable("Users");
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.Verification", b =>
@@ -325,170 +472,54 @@ namespace RunBuddies.DataModel.Migrations
                     b.ToTable("Verifications");
                 });
 
-            modelBuilder.Entity("RunBuddies.DataModel.BuddyInvitation", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("RunBuddies.DataModel.User", "Receiver")
-                        .WithMany("ReceivedBuddyInvitations")
-                        .HasForeignKey("ReceiverID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("RunBuddies.DataModel.User", "Sender")
-                        .WithMany("SentBuddyInvitations")
-                        .HasForeignKey("SenderID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.BuddyPartner", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.User", "User")
-                        .WithMany("BuddyPartners")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.BuddySession", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.BuddyPartner", "BuddyPartner")
-                        .WithMany("BuddySessions")
-                        .HasForeignKey("BuddyID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("RunBuddies.DataModel.Verification", "Verification")
-                        .WithOne("BuddySessions")
-                        .HasForeignKey("RunBuddies.DataModel.BuddySession", "VerificationID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("BuddyPartner");
-
-                    b.Navigation("Verification");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.Club", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.ClubMember", "ClubMember")
-                        .WithMany("Clubs")
-                        .HasForeignKey("ClubMemberID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("RunBuddies.DataModel.ClubModerator", "ClubModerator")
-                        .WithMany("Clubs")
-                        .HasForeignKey("ClubModeratorID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ClubMember");
-
-                    b.Navigation("ClubModerator");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.ClubMember", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.User", "User")
-                        .WithMany("ClubMembers")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.ClubModerator", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.User", "User")
-                        .WithMany("ClubModerators")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.Event", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.Club", "Club")
-                        .WithMany("Events")
-                        .HasForeignKey("ClubID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("RunBuddies.DataModel.User", "User")
-                        .WithMany("Events")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Club");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.Leaderboard", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.Event", "Events")
-                        .WithOne("Leaderboards")
-                        .HasForeignKey("RunBuddies.DataModel.Leaderboard", "EventID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Events");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.BuddyPartner", b =>
-                {
-                    b.Navigation("BuddySessions");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.Club", b =>
-                {
-                    b.Navigation("Events");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.ClubMember", b =>
-                {
-                    b.Navigation("Clubs");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.ClubModerator", b =>
-                {
-                    b.Navigation("Clubs");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.Event", b =>
-                {
-                    b.Navigation("Leaderboards")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RunBuddies.DataModel.User", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.Navigation("BuddyPartners");
-
-                    b.Navigation("ClubMembers");
-
-                    b.Navigation("ClubModerators");
-
-                    b.Navigation("Events");
-
-                    b.Navigation("ReceivedBuddyInvitations");
-
-                    b.Navigation("SentBuddyInvitations");
+                    b.HasOne("RunBuddies.DataModel.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("RunBuddies.DataModel.Verification", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.Navigation("BuddySessions")
+                    b.HasOne("RunBuddies.DataModel.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RunBuddies.DataModel.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("RunBuddies.DataModel.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

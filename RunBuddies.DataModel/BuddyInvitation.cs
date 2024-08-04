@@ -11,8 +11,8 @@ namespace RunBuddies.DataModel
     {
         [Key]
         public int InvitationID { get; set; }
-        public int SenderID { get; set; }
-        public int ReceiverID { get; set; }
+        public string SenderID { get; set; }
+        public string ReceiverID { get; set; }
         public DateTime SentDate { get; set; }
         public InvitationStatus Status { get; set; }
 
