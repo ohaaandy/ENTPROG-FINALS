@@ -30,28 +30,29 @@ namespace RunBuddies.App.Controllers
             return View();
         }
 
-       [HttpPost]
-        public IActionResult Search(string searchType, string level, string location, string[] days)
+        public IActionResult Search(string searchType, string level, string location, string[] days, int? distance)
         {
             var daysList = days?.Select(d => ConvertToDayOfWeek(d.Trim()))
                                 .Where(d => d.HasValue)
                                 .Select(d => d.Value)
                                 .ToList() ?? new List<DayOfWeek>();
-
             var results = new List<SearchResultViewModel>();
 
             if (searchType == "RunningBuddy")
             {
                 var query = _context.Users.AsQueryable();
-
                 if (!string.IsNullOrEmpty(level))
                     query = query.Where(u => u.RunnerLevel == level);
-
                 if (!string.IsNullOrEmpty(location))
                     query = query.Where(u => u.Location == location);
-
                 if (daysList.Any())
-                    query = query.Where(u => daysList.Contains(u.Schedule.DayOfWeek)); // Assuming Schedule is DateTime
+                    query = query.Where(u => daysList.Contains(u.Schedule.DayOfWeek));
+
+                var debugResults = query.ToList();  // Materialize the query for debugging
+                foreach (var user in debugResults)
+                {
+                    Console.WriteLine($"User: {user.FirstName}, Distance: {user.Distance}");  // Or use your preferred logging method
+                }
 
                 results = query.Select(u => new SearchResultViewModel
                 {
@@ -60,13 +61,13 @@ namespace RunBuddies.App.Controllers
                     Level = u.RunnerLevel,
                     Location = u.Location,
                     Schedule = u.Schedule.DayOfWeek.ToString(),
+                    Distance = u.Distance,  // Show the user's actual distance
                     Type = "Buddy"
                 }).ToList();
             }
             else if (searchType == "RunningClub")
             {
                 var query = _context.Clubs.AsQueryable();
-
                 if (!string.IsNullOrEmpty(location))
                     query = query.Where(c => c.Location == location);
 
@@ -76,7 +77,8 @@ namespace RunBuddies.App.Controllers
                     Name = c.ClubName,
                     Level = "N/A",
                     Location = c.Location,
-                    Schedule = "N/A", // You might want to add a Schedule property to the Club model
+                    Schedule = "N/A",
+                    Distance = distance ?? 0,  // Show the distance specified in the search
                     Type = "Club"
                 }).ToList();
             }
@@ -127,7 +129,7 @@ namespace RunBuddies.App.Controllers
 
             if (searchType == "RunningBuddy")
             {
-                var query = _context.Users.AsEnumerable();  // Bring data to memory
+                var query = _context.Users.AsEnumerable();
 
                 if (!string.IsNullOrEmpty(level))
                     query = query.Where(u => u.RunnerLevel == level);
@@ -141,29 +143,15 @@ namespace RunBuddies.App.Controllers
                 results = query.Select(u => new SearchResultViewModel
                 {
                     Id = u.UserID,
-                    Name = u.FirstName + " " + u.LastName,
+                    Name = $"{u.FirstName} {u.LastName}",
                     Level = u.RunnerLevel,
                     Location = u.Location,
                     Schedule = u.Schedule.DayOfWeek.ToString(),
+                    Distance = u.Distance,
                     Type = "Buddy"
                 }).ToList();
             }
-            else if (searchType == "RunningClub")
-            {
-                results = _context.Clubs
-                    .Where(c => string.IsNullOrEmpty(location) || c.Location == location)
-                    .AsEnumerable()  // Bring data to memory
-                    .Select(c => new SearchResultViewModel
-                    {
-                        Id = c.ClubID,
-                        Name = c.ClubName,
-                        Level = "N/A",
-                        Location = c.Location,
-                        Schedule = "N/A", // You might want to add a Schedule property to the Club model
-                        Type = "Club"
-                    })
-                    .ToList();
-            }
+            // ... rest of the method remains the same
 
             return View(results);
         }
@@ -172,23 +160,21 @@ namespace RunBuddies.App.Controllers
         {
             switch (day.ToLower())
             {
-                case "mon":
-                    return DayOfWeek.Monday;
-                case "tue":
-                    return DayOfWeek.Tuesday;
-                case "wed":
-                    return DayOfWeek.Wednesday;
-                case "thu":
-                    return DayOfWeek.Thursday;
-                case "fri":
-                    return DayOfWeek.Friday;
-                case "sat":
-                    return DayOfWeek.Saturday;
-                case "sun":
-                    return DayOfWeek.Sunday;
-                default:
-                    return null;
+                case "mon": return DayOfWeek.Monday;
+                case "tue": return DayOfWeek.Tuesday;
+                case "wed": return DayOfWeek.Wednesday;
+                case "thu": return DayOfWeek.Thursday;
+                case "fri": return DayOfWeek.Friday;
+                case "sat": return DayOfWeek.Saturday;
+                case "sun": return DayOfWeek.Sunday;
+                default: return null;
             }
+        }
+
+        public IActionResult TestQuery()
+        {
+            var users = _context.Users.ToList();
+            return Json(users);
         }
     }
 }

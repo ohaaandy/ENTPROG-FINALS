@@ -15,6 +15,7 @@
                 <th>Level</th>
                 <th>Location</th>
                 <th>Schedule</th>
+                <th>Distance (km)</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -26,6 +27,7 @@
                     <td>@result.Level</td>
                     <td>@result.Location</td>
                     <td>@result.Schedule</td>
+                    <td>@result.Distance</td>
                     <td>
                         <button class="btn btn-primary view-details" data-id="@result.Id" data-type="@result.Type">View Details</button>
                         @if (result.Type == "Buddy")
@@ -102,6 +104,27 @@ else
                     }
                 });
             });
+            function displaySearchResults(results) {
+                var html = '<table class="table"><thead><tr><th>Name</th><th>Level</th><th>Location</th><th>Schedule</th><th>Distance (km)</th><th>Action</th></tr></thead><tbody>';
+                results.forEach(function (result) {
+                    html += '<tr>';
+                    html += '<td>' + result.name + '</td>';
+                    html += '<td>' + result.level + '</td>';
+                    html += '<td>' + result.location + '</td>';
+                    html += '<td>' + result.schedule + '</td>';
+                    html += '<td>' + result.distance + '</td>';
+                    html += '<td>';
+                    html += '<button class="btn btn-primary view-details" data-id="' + result.id + '" data-type="' + result.type + '">View Details</button> ';
+                    if (result.type === 'Buddy') {
+                        html += '<button class="btn btn-success invite-buddy" data-id="' + result.id + '">Invite as Buddy</button>';
+                    } else {
+                        html += '<button class="btn btn-success join-club" data-id="' + result.id + '">Join Club</button>';
+                    }
+                    html += '</td>';
+                    html += '</tr>';
+                });
+                html += '</tbody></table>';
+                $('#searchResults').html(html);
         });
     </script>
 }

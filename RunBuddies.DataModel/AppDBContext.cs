@@ -20,54 +20,53 @@ namespace RunBuddies.DataModel
                 Users.AddRange(
                     new User
                     {
+                        Username = "john_doe",
+                        Password = "password123", // In a real app, make sure to hash passwords
+                        Email = "john@example.com",
                         FirstName = "John",
                         LastName = "Doe",
+                        Birthday = new DateOnly(1990, 1, 1),
+                        Gender = "Male",
+                        ContactNumber = 1234567890,
                         RunnerLevel = "Beginner",
+                        Schedule = new DateOnly(2023, 1, 2), // This represents Monday
                         Location = "Manila",
-                        Schedule = new DateOnly(2023, 1, 2) // Monday
+                        Distance = 5
                     },
                     new User
                     {
+                        Username = "jane_smith",
+                        Password = "password456",
+                        Email = "jane@example.com",
                         FirstName = "Jane",
                         LastName = "Smith",
+                        Birthday = new DateOnly(1992, 5, 15),
+                        Gender = "Female",
+                        ContactNumber = 1234567890,
                         RunnerLevel = "Intermediate",
+                        Schedule = new DateOnly(2023, 1, 4), // This represents Wednesday
                         Location = "Quezon City",
-                        Schedule = new DateOnly(2023, 1, 3) // Tuesday
+                        Distance = 10
                     },
                     new User
                     {
+                        Username = "mike_johnson",
+                        Password = "password789",
+                        Email = "mike@example.com",
                         FirstName = "Mike",
                         LastName = "Johnson",
+                        Birthday = new DateOnly(1988, 9, 30),
+                        Gender = "Male",
+                        ContactNumber = 1234567890,
                         RunnerLevel = "Advanced",
+                        Schedule = new DateOnly(2023, 1, 7), // This represents Saturday
                         Location = "Makati",
-                        Schedule = new DateOnly(2023, 1, 5) // Thursday
+                        Distance = 15
                     }
                 );
-            }
 
-            if (!Clubs.Any())
-            {
-                Clubs.AddRange(
-                    new Club
-                    {
-                        ClubName = "Manila Runners",
-                        Location = "Manila",
-                        // You might want to add a Schedule property to the Club model
-                    },
-                    new Club
-                    {
-                        ClubName = "QC Sprinters",
-                        Location = "Quezon City",
-                    },
-                    new Club
-                    {
-                        ClubName = "Makati Marathoners",
-                        Location = "Makati",
-                    }
-                );
+                SaveChanges();
             }
-
-            SaveChanges();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
