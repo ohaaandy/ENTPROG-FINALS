@@ -158,6 +158,18 @@ namespace RunBuddies.DataModel
                 .WithOne(p => p.BuddySessions)
                 .HasForeignKey<BuddySession>(p => p.VerificationID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BuddyInvitation>()
+        .HasOne(bi => bi.Sender)
+        .WithMany(u => u.SentBuddyInvitations)
+        .HasForeignKey(bi => bi.SenderID)
+        .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BuddyInvitation>()
+                .HasOne(bi => bi.Receiver)
+                .WithMany(u => u.ReceivedBuddyInvitations)
+                .HasForeignKey(bi => bi.ReceiverID)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public DbSet<User> Users { get; set; }
@@ -169,5 +181,7 @@ namespace RunBuddies.DataModel
         public DbSet<Leaderboard> Leaderboards { get; set; }
         public DbSet<Verification> Verifications { get; set; }
         public DbSet<BuddySession> BuddySessions { get; set; }
+        public DbSet<BuddyInvitation> BuddyInvitations { get; set; }
+
     }
 }

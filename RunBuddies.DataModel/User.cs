@@ -28,6 +28,8 @@ namespace RunBuddies.DataModel
 
         public string Location { get; set; }
         public int Distance { get; set; }
+        public ICollection<BuddyInvitation> SentBuddyInvitations { get; set; }
+        public ICollection<BuddyInvitation> ReceivedBuddyInvitations { get; set; }
 
         public List<ClubModerator> ClubModerators { get; set; }     //many to one
         public List<ClubMember> ClubMembers { get; set; }           //many to one

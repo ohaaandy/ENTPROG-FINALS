@@ -1,0 +1,27 @@
+﻿@model List<BuddyInvitation>
+
+<h2>Pending Buddy Invitations</h2>
+
+@foreach (var invitation in Model)
+{
+    <div class="invitation">
+        <p>@invitation.Sender.FirstName @invitation.Sender.LastName has invited you to be their running buddy.</p>
+        <button class="btn btn-success accept-invitation" data-id="@invitation.InvitationID">Accept</button>
+        <button class="btn btn-danger reject-invitation" data-id="@invitation.InvitationID">Reject</button>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $('.accept-invitation, .reject-invitation').click(function () {
+            var id = $(this).data('id');
+            var accept = $(this).hasClass('accept-invitation');
+            $.post('@Url.Action("RespondToInvitation", "Buddy")', { invitationId: id, accept: accept }, function (result) {
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                }
+            });
+        });
+    </script>
+}

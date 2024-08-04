@@ -1,0 +1,18 @@
+﻿@model List<BuddyPartner>
+
+<h2>My Running Buddies</h2>
+
+@foreach (var buddy in Model)
+{
+    <div class="buddy">
+        @if (buddy.UserID == ViewBag.CurrentUserId)
+        {
+            <p>@buddy.User.FirstName @buddy.User.LastName</p>
+        }
+        else
+        {
+            <p>@buddy.User.FirstName @buddy.User.LastName</p>
+        }
+        <!-- Add more details as needed -->
+    </div>
+}

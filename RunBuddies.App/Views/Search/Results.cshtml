@@ -6,9 +6,11 @@
 
 <h2>Search Results</h2>
 
+<a asp-controller="Club" asp-action="Create" class="btn btn-primary mb-3">Create Club</a>
+
 @if (Model.Any())
 {
-    <table class="table">
+    <table id="ResultTable" class="table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -67,6 +69,8 @@ else
 @section Scripts {
     <script>
         $(document).ready(function () {
+            $('#ResultTable').DataTable();
+
             $('.view-details').click(function () {
                 var id = $(this).data('id');
                 var type = $(this).data('type');
@@ -83,13 +87,8 @@ else
 
             $('.invite-buddy').click(function () {
                 var id = $(this).data('id');
-                $.ajax({
-                    url: '@Url.Action("InviteBuddy", "Search")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function (result) {
-                        alert(result.message);
-                    }
+                $.post('@Url.Action("SendInvitation", "Buddy")', { receiverId: id }, function (result) {
+                    alert(result.message);
                 });
             });
 
@@ -104,27 +103,6 @@ else
                     }
                 });
             });
-            function displaySearchResults(results) {
-                var html = '<table class="table"><thead><tr><th>Name</th><th>Level</th><th>Location</th><th>Schedule</th><th>Distance (km)</th><th>Action</th></tr></thead><tbody>';
-                results.forEach(function (result) {
-                    html += '<tr>';
-                    html += '<td>' + result.name + '</td>';
-                    html += '<td>' + result.level + '</td>';
-                    html += '<td>' + result.location + '</td>';
-                    html += '<td>' + result.schedule + '</td>';
-                    html += '<td>' + result.distance + '</td>';
-                    html += '<td>';
-                    html += '<button class="btn btn-primary view-details" data-id="' + result.id + '" data-type="' + result.type + '">View Details</button> ';
-                    if (result.type === 'Buddy') {
-                        html += '<button class="btn btn-success invite-buddy" data-id="' + result.id + '">Invite as Buddy</button>';
-                    } else {
-                        html += '<button class="btn btn-success join-club" data-id="' + result.id + '">Join Club</button>';
-                    }
-                    html += '</td>';
-                    html += '</tr>';
-                });
-                html += '</tbody></table>';
-                $('#searchResults').html(html);
         });
     </script>
 }

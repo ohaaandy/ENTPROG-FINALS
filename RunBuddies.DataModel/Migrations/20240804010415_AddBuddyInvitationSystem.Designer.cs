@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RunBuddies.DataModel;
 
@@ -11,9 +12,11 @@ using RunBuddies.DataModel;
 namespace RunBuddies.DataModel.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240804010415_AddBuddyInvitationSystem")]
+    partial class AddBuddyInvitationSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasIndex("SenderID");
 
-                    b.ToTable("BuddyInvitations", (string)null);
+                    b.ToTable("BuddyInvitations");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.BuddyPartner", b =>
@@ -66,7 +69,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("BuddyPartners", (string)null);
+                    b.ToTable("BuddyPartners");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.BuddySession", b =>
@@ -101,7 +104,7 @@ namespace RunBuddies.DataModel.Migrations
                     b.HasIndex("VerificationID")
                         .IsUnique();
 
-                    b.ToTable("BuddySessions", (string)null);
+                    b.ToTable("BuddySessions");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.Club", b =>
@@ -140,7 +143,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasIndex("ClubModeratorID");
 
-                    b.ToTable("Clubs", (string)null);
+                    b.ToTable("Clubs");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.ClubMember", b =>
@@ -158,7 +161,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ClubMembers", (string)null);
+                    b.ToTable("ClubMembers");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.ClubModerator", b =>
@@ -176,7 +179,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ClubModerators", (string)null);
+                    b.ToTable("ClubModerators");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.Event", b =>
@@ -221,7 +224,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.Leaderboard", b =>
@@ -246,7 +249,7 @@ namespace RunBuddies.DataModel.Migrations
                     b.HasIndex("EventID")
                         .IsUnique();
 
-                    b.ToTable("Leaderboards", (string)null);
+                    b.ToTable("Leaderboards");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.User", b =>
@@ -303,7 +306,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasKey("UserID");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.Verification", b =>
@@ -319,7 +322,7 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.HasKey("VerificationID");
 
-                    b.ToTable("Verifications", (string)null);
+                    b.ToTable("Verifications");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.BuddyInvitation", b =>
