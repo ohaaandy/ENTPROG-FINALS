@@ -70,18 +70,25 @@ namespace RunBuddies.DataModel
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //Andy SQL
-            //optionsBuilder.UseSqlServer(
-            //    "server=APOL\\SQLEXPRESS;" +
-            //    "database=RunBuddies;" +
-            //    "integrated security=SSPI;" +
-            //    "trustservercertificate=true");
+            if (!optionsBuilder.IsConfigured)
+            {
+                //Andy SQL
+                //optionsBuilder.UseSqlServer(
+                //    "server=APOL\\SQLEXPRESS;" +
+                //    "database=RunBuddies;" +
+                //    "integrated security=SSPI;" +
+                //    "trustservercertificate=true");
 
-            //Monty SQL
+                //Monty SQL
+                optionsBuilder.UseSqlServer(
+                        "Server = ANDREIPC\\SQLEXPRESS;" +
+                        "Database = ENTPROG_XTIS3_Suppliers;" +
+                        "Integrated Security = SSPI;" +
+                        "TrustServerCertificate = true");
 
-            //Yash SQL
-            optionsBuilder.UseSqlServer("server=LAPTOP-A7QL1S73\\SQLEXPRESS;Database=ENTPROG_Finals;integrated security=sspi;trustservercertificate=true");
-
+                //Yash SQL
+                //optionsBuilder.UseSqlServer("server=LAPTOP-A7QL1S73\\SQLEXPRESS;Database=ENTPROG_Finals;integrated security=sspi;trustservercertificate=true");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
