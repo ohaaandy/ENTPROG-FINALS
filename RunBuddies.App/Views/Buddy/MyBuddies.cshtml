@@ -1,18 +1,67 @@
-﻿@model List<BuddyPartner>
+﻿@model MyBuddiesViewModel
+
+@{
+    ViewData["Title"] = "My Buddies";
+}
 
 <h2>My Running Buddies</h2>
 
-@foreach (var buddy in Model)
+@if (Model.Buddies.Any())
 {
-    <div class="buddy">
-        @if (buddy.UserID == ViewBag.CurrentUserId)
+    <div class="row">
+        @foreach (var buddy in Model.Buddies)
         {
-            <p>@buddy.User.FirstName @buddy.User.LastName</p>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@buddy.FullName</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@buddy.RunnerLevel Runner</h6>
+                        <p class="card-text">
+                            <strong>Location:</strong> @buddy.Location<br>
+                            <strong>Preferred Schedule:</strong> @buddy.PreferredSchedule<br>
+                            <strong>Preferred Distance:</strong> @buddy.PreferredDistance km
+                        </p>
+                        <div class="mb-3">
+                            <strong>Contact:</strong><br>
+                            <a href="mailto:@buddy.Email" class="card-link">
+                                <i class="fas fa-envelope"></i> Email
+                            </a>
+                            <a href="tel:@buddy.PhoneNumber" class="card-link">
+                                <i class="fas fa-phone"></i> Call
+                            </a>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Recent Sessions:</strong>
+                            @if (buddy.RecentSessions.Any())
+                            {
+                                <ul class="list-unstyled">
+                                    @foreach (var session in buddy.RecentSessions)
+                                    {
+                                        <li>
+                                            @session.DateTime.ToString("MMM dd, yyyy") - @session.Location
+                                            <small class="text-muted">@session.Description</small>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>No recent sessions</p>
+                            }
+                        </div>
+                        <a href="@Url.Action("ScheduleSession", "Buddy", new { buddyId = buddy.UserId })" class="btn btn-primary">
+                            Schedule a Run
+                        </a>
+                    </div>
+                </div>
+            </div>
         }
-        else
-        {
-            <p>@buddy.User.FirstName @buddy.User.LastName</p>
-        }
-        <!-- Add more details as needed -->
     </div>
+}
+else
+{
+    <p>You don't have any running buddies yet. Start searching for buddies to connect with!</p>
+    <a href="@Url.Action("Filter", "Search", new { searchType = "RunningBuddy" })" class="btn btn-primary">
+        Find Running Buddies
+    </a>
 }

@@ -4,6 +4,7 @@ using RunBuddies.DataModel;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using RunBuddies.App.Models;
 
 namespace RunBuddies.App.Controllers
 {
@@ -11,10 +12,11 @@ namespace RunBuddies.App.Controllers
     public class BuddyController : Controller
     {
         private readonly AppDBContext _context;
-
-        public BuddyController(AppDBContext context)
+        private readonly UserManager<User> _userManager;
+        public BuddyController(AppDBContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -102,18 +104,45 @@ namespace RunBuddies.App.Controllers
             return Json(new { success = true, message = accept ? "Invitation accepted" : "Invitation rejected" });
         }
         [Authorize]
-        public IActionResult MyBuddies()
+        public async Task<IActionResult> MyBuddies()
         {
-            var userId = GetCurrentUserId();
-            var buddies = _context.BuddyPartners
-                .Where(bp => bp.UserID == userId || bp.User.Id == userId)
+            var currentUser = await _userManager.GetUserAsync(User);
+            var buddyPartnerships = await _context.BuddyPartners
+                .Where(bp => bp.UserID == currentUser.Id)
                 .Include(bp => bp.User)
-                .ToList();
+                .Include(bp => bp.BuddySessions)
+                .ToListAsync();
 
-            return View(buddies);
+            var viewModel = new MyBuddiesViewModel
+            {
+                Buddies = buddyPartnerships.Select(bp => new BuddyDetailViewModel
+                {
+                    UserId = bp.User.Id,
+                    FullName = $"{bp.User.FirstName} {bp.User.LastName}",
+                    RunnerLevel = bp.User.RunnerLevel,
+                    Location = bp.User.Location,
+                    PreferredSchedule = bp.User.Schedule?.ToString("dddd"),
+                    PreferredDistance = bp.User.Distance ?? 0,
+                    Email = bp.User.Email,
+                    PhoneNumber = bp.User.PhoneNumber,
+                    RecentSessions = bp.BuddySessions
+                        .OrderByDescending(bs => bs.DateTime)
+                        .Take(3)
+                        .Select(bs => new BuddySessionViewModel
+                        {
+                            DateTime = bs.DateTime,
+                            Location = bs.Location,
+                            Description = bs.Description
+                        })
+                        .ToList()
+                }).ToList()
+            };
+
+            return View(viewModel);
         }
+    
 
-        private string GetCurrentUserId()//Must be Authenticated to work
+    private string GetCurrentUserId()//Must be Authenticated to work
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim != null)
