@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,20 +11,21 @@ namespace RunBuddies.DataModel
 {
     public class AppDBContext : IdentityDbContext<User>
     {
+        private readonly UserManager<User> userManager;
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
-
+            this.userManager = userManager;
         }
 
-        public void SeedSampleData()
+        public async Task SeedSampleDataAsync()
         {
             if (!Users.Any())
             {
-                Users.AddRange(
+                var users = new List<User>
+                {
                     new User
                     {
                         UserName = "john_doe",
-                        PasswordHash = "password123", // In a real app, make sure to hash passwords
                         Email = "john@example.com",
                         FirstName = "John",
                         LastName = "Doe",
@@ -31,43 +33,44 @@ namespace RunBuddies.DataModel
                         Gender = "Male",
                         PhoneNumber = "1234567890",
                         RunnerLevel = "Beginner",
-                        Schedule = new DateOnly(2023, 1, 2), // This represents Monday
+                        Schedule = new DateOnly(2023, 1, 2),
                         Location = "Manila",
                         Distance = 5
                     },
                     new User
                     {
                         UserName = "jane_smith",
-                        PasswordHash = "password456",
                         Email = "jane@example.com",
                         FirstName = "Jane",
                         LastName = "Smith",
                         Birthday = new DateOnly(1992, 5, 15),
                         Gender = "Female",
-                        PhoneNumber = "1234567890",
+                        PhoneNumber = "9876543210",
                         RunnerLevel = "Intermediate",
-                        Schedule = new DateOnly(2023, 1, 4), // This represents Wednesday
+                        Schedule = new DateOnly(2023, 1, 4),
                         Location = "Quezon City",
                         Distance = 10
                     },
                     new User
                     {
                         UserName = "mike_johnson",
-                        PasswordHash = "password789",
                         Email = "mike@example.com",
                         FirstName = "Mike",
                         LastName = "Johnson",
                         Birthday = new DateOnly(1988, 9, 30),
                         Gender = "Male",
-                        PhoneNumber = "1234567890",
+                        PhoneNumber = "5555555555",
                         RunnerLevel = "Advanced",
-                        Schedule = new DateOnly(2023, 1, 7), // This represents Saturday
+                        Schedule = new DateOnly(2023, 1, 7),
                         Location = "Makati",
                         Distance = 15
                     }
-                );
+                };
 
-                SaveChanges();
+                foreach (var user in users)
+                {
+                    await userManager.CreateAsync(user, "Password123!");
+                }
             }
         }
 
@@ -77,10 +80,7 @@ namespace RunBuddies.DataModel
             {
                 //Monty SQL
                 optionsBuilder.UseSqlServer(
-                    "Server = ANDREIPC\\SQLEXPRESS;" +
-                    "Database = ENTPROG_FINALS;" +
-                    "Integrated Security = SSPI;" +
-                    "TrustServerCertificate = true");
+                    "server=LAPTOP-A7QL1S73\\SQLEXPRESS;Database=ENTPROG_Finals;integrated security=sspi;trustservercertificate=true");
             }
         }
 

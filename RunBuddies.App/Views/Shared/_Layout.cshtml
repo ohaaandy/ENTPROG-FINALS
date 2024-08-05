@@ -45,12 +45,35 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">Profile</a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Buddy" asp-action="PendingInvitations">Pending Invitations</a>
-                        </li>
-                        <li class="nav-item">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Buddy" asp-action="PendingInvitations">
+                                    Pending Invitations @await Component.InvokeAsync("PendingInvitations")
+                                </a>
+                            </li>
+                        }
+
                             <a class="nav-link text-dark" asp-area="" asp-controller="Buddy" asp-action="MyBuddies">My Buddies</a>
                         </li>
+
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <form asp-controller="Profile" asp-action="SignOut" method="post">
+                                    <button type="submit" class="btn btn-link nav-link text-dark">Sign Out</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Profile" asp-action="SignIn">Sign In</a>
+                            </li>
+                        }
+
+
                     </ul>
                     </ul>
                 </div>

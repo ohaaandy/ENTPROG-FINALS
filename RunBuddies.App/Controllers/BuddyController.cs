@@ -124,5 +124,11 @@ namespace RunBuddies.App.Controllers
             // If the user is not authenticated or the claim is not found, throw an exception
             throw new InvalidOperationException("User is not authenticated or user ID claim is missing.");
         }
+        public int GetPendingInvitationsCount()
+        {
+            var userId = GetCurrentUserId();
+            return _context.BuddyInvitations
+                .Count(bi => bi.ReceiverID == userId && bi.Status == InvitationStatus.Pending);
+        }
     }
 }

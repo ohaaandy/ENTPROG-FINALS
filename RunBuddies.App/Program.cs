@@ -7,7 +7,7 @@ namespace RunBuddies.App
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +15,7 @@ namespace RunBuddies.App
 
             builder.Services.AddDbContext<AppDBContext>(opts =>
             {
-                opts.UseSqlServer(builder.Configuration.GetConnectionString("Monty"));
+                opts.UseSqlServer(builder.Configuration.GetConnectionString("Yash"));
             });
 
             ////Add Service to use the AutoMapper
@@ -54,13 +54,14 @@ namespace RunBuddies.App
 
             var app = builder.Build();
 
-        using (var scope = app.Services.CreateScope())
-        {
-            var services = scope.ServiceProvider;
-            var context = services.GetRequiredService<AppDBContext>();
-            context.Database.EnsureCreated();
-            context.SeedSampleData();
-        }
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<AppDBContext>();
+                var userManager = services.GetRequiredService<UserManager<User>>();
+                await context.Database.EnsureCreatedAsync();
+                await context.SeedSampleDataAsync();
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

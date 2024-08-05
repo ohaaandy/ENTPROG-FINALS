@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RunBuddies.App.Models;
 using RunBuddies.DataModel;
@@ -17,6 +18,70 @@ namespace RunBuddies.App.Controllers
 
             this.signInManager = signInManager;
         }
+        [Authorize]
+        public async Task<IActionResult> Index()
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new ProfileViewModel
+            {
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Birthday = user.Birthday,
+                Gender = user.Gender,
+                RunnerLevel = user.RunnerLevel,
+                Location = user.Location,
+                Schedule = user.Schedule?.ToString("dddd"),
+                Distance = user.Distance
+            };
+
+            return View(viewModel);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(ProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Index", model);
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Birthday = model.Birthday;
+            user.Gender = model.Gender;
+            user.RunnerLevel = model.RunnerLevel;
+            user.Location = model.Location;
+            user.Schedule = string.IsNullOrEmpty(model.Schedule) ? null : DateOnly.Parse(model.Schedule);
+            user.Distance = model.Distance;
+
+            var result = await userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View("Index", model);
+        }
+
+
 
         public IActionResult Register()
         {
@@ -106,5 +171,7 @@ namespace RunBuddies.App.Controllers
 
             return RedirectToAction("SignIn", "Profile");
         }
+
+
     }
 }

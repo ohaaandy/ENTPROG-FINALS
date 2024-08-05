@@ -1,26 +1,71 @@
 ﻿@model List<BuddyInvitation>
-
-<h2>Pending Buddy Invitations</h2>
-
-@foreach (var invitation in Model)
-{
-    <div class="invitation">
-        <p>@invitation.Sender.FirstName @invitation.Sender.LastName has invited you to be their running buddy.</p>
-        <button class="btn btn-success accept-invitation" data-id="@invitation.InvitationID">Accept</button>
-        <button class="btn btn-danger reject-invitation" data-id="@invitation.InvitationID">Reject</button>
-    </div>
+@{
+    ViewData["Title"] = "Pending Buddy Invitations";
 }
+
+<div class="container mt-4">
+    <h2 class="mb-4">Pending Buddy Invitations</h2>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Sender</th>
+                        <th>Sent Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var invitation in Model)
+                    {
+                        <tr>
+                            <td>
+                                @invitation.Sender.FirstName @invitation.Sender.LastName
+                            </td>
+                            <td>@invitation.SentDate.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                <button class="btn btn-sm btn-success accept-invitation" data-id="@invitation.InvitationID">
+                                    Accept
+                                </button>
+                                <button class="btn btn-sm btn-danger reject-invitation" data-id="@invitation.InvitationID">
+                                    Reject
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            You have no pending buddy invitations at the moment.
+        </div>
+    }
+</div>
 
 @section Scripts {
     <script>
-        $('.accept-invitation, .reject-invitation').click(function () {
-            var id = $(this).data('id');
-            var accept = $(this).hasClass('accept-invitation');
-            $.post('@Url.Action("RespondToInvitation", "Buddy")', { invitationId: id, accept: accept }, function (result) {
-                if (result.success) {
-                    alert(result.message);
-                    location.reload();
-                }
+        $(document).ready(function () {
+            $('.accept-invitation, .reject-invitation').click(function () {
+                var button = $(this);
+                var id = button.data('id');
+                var accept = button.hasClass('accept-invitation');
+
+                $.post('@Url.Action("RespondToInvitation", "Buddy")', { invitationId: id, accept: accept }, function (result) {
+                    if (result.success) {
+                        alert(result.message);
+                        button.closest('tr').fadeOut(300, function () { $(this).remove(); });
+                        if ($('tbody tr').length === 1) {
+                            location.reload();
+                        }
+                    } else {
+                        alert(result.message);
+                    }
+                });
             });
         });
     </script>
