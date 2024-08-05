@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RunBuddies.App.Models;
 using RunBuddies.DataModel;
+using System.Security.Claims;
 
 namespace RunBuddies.App.Controllers
 {
+
     public class SearchController : Controller
     {
         private readonly AppDBContext _context;
@@ -13,77 +16,103 @@ namespace RunBuddies.App.Controllers
         {
             _context = context;
         }
-
-        public IActionResult Filter()
+        [HttpGet]
+        public IActionResult Filter(string searchType)
         {
-            // Removed authentication check muna
+            ViewBag.SearchType = searchType ?? "RunningBuddy";
             return View();
         }
 
         public IActionResult RunningBuddy()
         {
-            return View();
+            ViewBag.SearchType = "RunningBuddy";
+            return View("Filter");
         }
 
         public IActionResult RunningClub()
         {
-            return View();
+            ViewBag.SearchType = "RunningClub";
+            return View("Filter");
         }
 
         public IActionResult Search(string searchType, string level, string location, string[] days, int? distance)
         {
-            var daysList = days?.Select(d => ConvertToDayOfWeek(d.Trim()))
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var daysList = days?.Select(ConvertToDayOfWeek)
                                 .Where(d => d.HasValue)
                                 .Select(d => d.Value)
                                 .ToList() ?? new List<DayOfWeek>();
             var results = new List<SearchResultViewModel>();
 
-            if (searchType == "RunningBuddy")
+            try
             {
-                var query = _context.Users.AsQueryable();
-                if (!string.IsNullOrEmpty(level))
-                    query = query.Where(u => u.RunnerLevel == level);
-                if (!string.IsNullOrEmpty(location))
-                    query = query.Where(u => u.Location == location);
-                if (daysList.Any())
-                    query = query.Where(u => daysList.Contains(u.Schedule.Value.DayOfWeek));
-
-                var debugResults = query.ToList();  // Materialize the query for debugging
-                foreach (var user in debugResults)
+                if (searchType == "RunningBuddy")
                 {
-                    Console.WriteLine($"User: {user.FirstName}, Distance: {user.Distance}");  // Or use your preferred logging method
+                    var query = _context.Users.AsQueryable();
+
+                    // Exclude the current user
+                    query = query.Where(u => u.Id != currentUserId);
+
+                    if (!string.IsNullOrEmpty(level))
+                        query = query.Where(u => u.RunnerLevel == level);
+
+                    if (!string.IsNullOrEmpty(location))
+                        query = query.Where(u => u.Location == location);
+
+                    if (daysList.Any())
+                        query = query.Where(u => u.Schedule.HasValue && daysList.Contains(u.Schedule.Value.DayOfWeek));
+
+                    if (distance.HasValue)
+                        query = query.Where(u => u.Distance == distance.Value);
+
+                    results = query.Select(u => new SearchResultViewModel
+                    {
+                        Id = u.Id,
+                        Name = u.FirstName + " " + u.LastName,
+                        Level = u.RunnerLevel ?? "Not specified",
+                        Location = u.Location ?? "Not specified",
+                        Schedule = u.Schedule.HasValue ? u.Schedule.Value.DayOfWeek.ToString() : "Not specified",
+                        Distance = u.Distance ?? 0,
+                        Type = "Buddy"
+                    }).ToList();
+
+                    // Logging (consider using a proper logging framework in production)
+                    foreach (var user in results)
+                    {
+                        Console.WriteLine($"User: {user.Name}, Distance: {user.Distance}");
+                    }
+                }
+                else if (searchType == "RunningClub")
+                {
+                    var query = _context.Clubs.AsQueryable();
+
+                    if (!string.IsNullOrEmpty(location))
+                        query = query.Where(c => c.Location == location);
+
+                    results = query.Select(c => new SearchResultViewModel
+                    {
+                        ClubId = c.ClubID,
+                        Name = c.ClubName,
+                        Level = "N/A",
+                        Location = c.Location ?? "Not specified",
+                        Schedule = "N/A",
+                        Distance = distance ?? 0,
+                        Type = "Club"
+                    }).ToList();
+                }
+                else
+                {
+                    return BadRequest("Invalid search type");
                 }
 
-                results = query.Select(u => new SearchResultViewModel
-                {
-                    Id = u.Id,
-                    Name = u.FirstName + " " + u.LastName,
-                    Level = u.RunnerLevel,
-                    Location = u.Location,
-                    Schedule = u.Schedule.Value.DayOfWeek.ToString(),
-                    Distance = (int)u.Distance,  // Show the user's actual distance
-                    Type = "Buddy"
-                }).ToList();
+                return Json(results);
             }
-            else if (searchType == "RunningClub")
+            catch (Exception ex)
             {
-                var query = _context.Clubs.AsQueryable();
-                if (!string.IsNullOrEmpty(location))
-                    query = query.Where(c => c.Location == location);
-
-                results = query.Select(c => new SearchResultViewModel
-                {
-                    ClubId = c.ClubID,
-                    Name = c.ClubName,
-                    Level = "N/A",
-                    Location = c.Location,
-                    Schedule = "N/A",
-                    Distance = distance ?? 0,  // Show the distance specified in the search
-                    Type = "Club"
-                }).ToList();
+                // Log the exception
+                Console.WriteLine($"An error occurred during search: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
             }
-
-            return Json(results);
         }
 
         [HttpGet]
@@ -117,10 +146,16 @@ namespace RunBuddies.App.Controllers
             return Json(new { message = "Club joined successfully" });
         }
 
+
+
+        [Authorize]
         public IActionResult Results(string searchType, string level, string location, string days)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Console.WriteLine($"Current User ID: {currentUserId}"); // Debug line
+
             var daysList = days?.Split(',')
-                .Select(d => ConvertToDayOfWeek(d.Trim()))
+                .Select(ConvertToDayOfWeek)
                 .Where(d => d.HasValue)
                 .Select(d => d.Value)
                 .ToList() ?? new List<DayOfWeek>();
@@ -129,7 +164,7 @@ namespace RunBuddies.App.Controllers
 
             if (searchType == "RunningBuddy")
             {
-                var query = _context.Users.AsEnumerable();
+                var query = _context.Users.AsQueryable();
 
                 if (!string.IsNullOrEmpty(level))
                     query = query.Where(u => u.RunnerLevel == level);
@@ -137,21 +172,49 @@ namespace RunBuddies.App.Controllers
                 if (!string.IsNullOrEmpty(location))
                     query = query.Where(u => u.Location == location);
 
-                if (daysList.Any())
-                    query = query.Where(u => daysList.Contains(u.Schedule.Value.DayOfWeek));
+                // Fetch the data from the database
+                var users = query.ToList();
 
-                results = query.Select(u => new SearchResultViewModel
+                // Perform the day filtering in memory
+                results = users
+                    .Where(u => !daysList.Any() || (u.Schedule.HasValue && daysList.Contains(u.Schedule.Value.DayOfWeek)))
+                    .Select(u => new SearchResultViewModel
+                    {
+                        Id = u.Id,
+                        Name = $"{u.FirstName} {u.LastName}",
+                        Level = u.RunnerLevel ?? "Not specified",
+                        Location = u.Location ?? "Not specified",
+                        Schedule = u.Schedule.HasValue ? u.Schedule.Value.DayOfWeek.ToString() : "Not specified",
+                        Distance = u.Distance ?? 0,
+                        Type = "Buddy"
+                    })
+                    .Where(r => r.Id != currentUserId)
+                    .ToList();
+
+                Console.WriteLine($"Results count: {results.Count}"); // Debug line
+                foreach (var result in results)
                 {
-                    Id = u.Id,
-                    Name = $"{u.FirstName} {u.LastName}",
-                    Level = u.RunnerLevel,
-                    Location = u.Location,
-                    Schedule = u.Schedule.Value.DayOfWeek.ToString(),
-                    Distance = (int)u.Distance,
-                    Type = "Buddy"
+                    Console.WriteLine($"User ID: {result.Id}, Name: {result.Name}"); // Debug line
+                }
+            }
+            else if (searchType == "RunningClub")
+            {
+                var query = _context.Clubs.AsQueryable();
+
+                if (!string.IsNullOrEmpty(location))
+                    query = query.Where(c => c.Location == location);
+
+                results = query.Select(c => new SearchResultViewModel
+                {
+                    ClubId = c.ClubID,
+                    Name = c.ClubName,
+                    Level = "N/A",
+                    Location = c.Location ?? "Not specified",
+                    Schedule = "N/A",
+                    Distance = 0, // You might want to add a Distance property to Club if needed
+                    Type = "Club"
                 }).ToList();
             }
-            // ... rest of the method remains the same
 
             return View(results);
         }

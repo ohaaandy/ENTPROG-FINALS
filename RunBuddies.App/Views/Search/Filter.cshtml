@@ -1,19 +1,27 @@
-﻿<h2>LOOKING FOR...</h2>
-<select id="searchType" name="searchType">
+﻿@{
+    ViewData["Title"] = "Find My...";
+    var searchType = ViewBag.SearchType as string ?? "RunningBuddy";
+}
+
+<h2>LOOKING FOR...</h2>
+<select id="searchType" name="searchType" asp-for="@searchType">
     <option value="RunningClub">Running Club</option>
     <option value="RunningBuddy">Running Buddy</option>
 </select>
 
-<h2>ARE YOU...</h2>
-<select id="level" name="level">
-    <option value="Beginner">Beginner</option>
-    <option value="Intermediate">Intermediate</option>
-    <option value="Advanced">Advanced</option>
-</select>
+<div id="runningBuddyOptions" style="@(searchType == "RunningBuddy" ? "" : "display: none;")">
+    <h2>ARE YOU...</h2>
+    <select id="level" name="level">
+        <option value="" disabled selected>Select Level</option>
+        <option value="Beginner">Beginner</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Advanced">Advanced</option>
+    </select>
+</div>
 
 <h2>WHERE YOU AT...</h2>
 <select id="location" name="location">
-    <option value="">Select City</option>
+    <option value="" disabled selected>Select City</option>
     <option value="Manila">Manila</option>
     <option value="Quezon City">Quezon City</option>
     <option value="Caloocan">Caloocan</option>
@@ -31,22 +39,22 @@
     <option value="Taguig">Taguig</option>
     <option value="Valenzuela">Valenzuela</option>
     <option value="Pateros">Pateros</option>
-    <!-- Add more cities as needed -->
 </select>
 
-<h2>WHAT DAY YOU RUN?</h2>
-<div id="runDays">
-    @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" })
-    {
-        <label class="day-btn">
-            <input type="checkbox" name="days" value="@day" />
-            <span>@day</span>
-        </label>
-    }
+<div id="runningBuddyDays" style="@(searchType == "RunningBuddy" ? "" : "display: none;")">
+    <h2>WHAT DAY YOU RUN?</h2>
+    <div id="runDays">
+        @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" })
+        {
+            <label class="day-btn">
+                <input type="checkbox" name="days" value="@day" />
+                <span>@day</span>
+            </label>
+        }
+    </div>
 </div>
 
 <p></p>
-
 <div>
     <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Back</a>
     <button id="searchBtn" class="btn btn-primary">Search</button>
@@ -59,47 +67,56 @@
             gap: 10px;
             margin-bottom: 20px;
         }
-
         .day-btn {
             display: inline-block;
             cursor: pointer;
         }
-
-            .day-btn input[type="checkbox"] {
-                display: none;
-            }
-
-            .day-btn span {
-                display: inline-block;
-                padding: 5px 10px;
-                background-color: #f0f0f0;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-            }
-
-            .day-btn input[type="checkbox"]:checked + span {
-                background-color: #007bff;
-                color: white;
-            }
+        .day-btn input[type="checkbox"] {
+            display: none;
+        }
+        .day-btn span {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .day-btn input[type="checkbox"]:checked + span {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 }
 
 @section Scripts {
     <script>
         $(document).ready(function () {
+            $('#searchType').change(function () {
+                var selectedType = $(this).val();
+                if (selectedType === "RunningBuddy") {
+                    $('#runningBuddyOptions').show();
+                    $('#runningBuddyDays').show();
+                } else {
+                    $('#runningBuddyOptions').hide();
+                    $('#runningBuddyDays').hide();
+                }
+            });
+
             $('#searchBtn').click(function () {
                 var searchType = $('#searchType').val();
-                var level = $('#level').val();
+                var level = searchType === "RunningBuddy" ? $('#level').val() : "";
                 var location = $('#location').val();
-                var days = $('input[name="days"]:checked').map(function () {
-                    return $(this).val();
-                }).get();
+                var days = searchType === "RunningBuddy" 
+                    ? $('input[name="days"]:checked').map(function () {
+                        return $(this).val();
+                      }).get().join(',')
+                    : "";
 
                 window.location.href = '@Url.Action("Results", "Search")' +
                     '?searchType=' + searchType +
                     '&level=' + level +
                     '&location=' + location +
-                    '&days=' + days.join(',');
+                    '&days=' + days;
             });
         });
     </script>

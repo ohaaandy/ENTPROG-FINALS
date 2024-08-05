@@ -6,7 +6,10 @@
 
 <h2>Search Results</h2>
 
-<a asp-controller="Club" asp-action="Create" class="btn btn-primary mb-3">Create Club</a>
+<div class="button-group">
+    <a href="@Url.Action("Filter", "Search")" class="btn btn-secondary">Back</a>
+    <a asp-controller="Club" asp-action="Create" class="btn btn-primary">Create Club</a>
+</div>
 
 @if (Model.Any())
 {

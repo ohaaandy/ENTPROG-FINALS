@@ -13,7 +13,7 @@ namespace RunBuddies.App.Models
         [Display(Name = "Runner Level")]
         public string? RunnerLevel { get; set; }
         [Display(Name = "Preferred Schedule")]
-        public string? Schedule { get; set; }
+        public DayOfWeek? PreferredDay { get; set; }
         public string? Location { get; set; }
         [Display(Name = "Preferred Distance (km)")]
         public int? Distance { get; set; }

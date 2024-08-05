@@ -36,7 +36,7 @@ namespace RunBuddies.App.Controllers
                 Gender = user.Gender,
                 RunnerLevel = user.RunnerLevel,
                 Location = user.Location,
-                Schedule = user.Schedule?.ToString("dddd"),
+                PreferredDay = user.Schedule?.DayOfWeek,
                 Distance = user.Distance
             };
 
@@ -64,7 +64,17 @@ namespace RunBuddies.App.Controllers
             user.Gender = model.Gender;
             user.RunnerLevel = model.RunnerLevel;
             user.Location = model.Location;
-            user.Schedule = string.IsNullOrEmpty(model.Schedule) ? null : DateOnly.Parse(model.Schedule);
+            if (model.PreferredDay.HasValue)
+            {
+                // Create a DateOnly for the next occurrence of the selected day
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                int daysUntilPreferred = ((int)model.PreferredDay.Value - (int)today.DayOfWeek + 7) % 7;
+                user.Schedule = today.AddDays(daysUntilPreferred);
+            }
+            else
+            {
+                user.Schedule = null;
+            }
             user.Distance = model.Distance;
 
             var result = await userManager.UpdateAsync(user);
