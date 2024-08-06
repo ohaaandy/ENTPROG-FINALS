@@ -89,12 +89,12 @@ namespace RunBuddies.App.Controllers
                     if (!string.IsNullOrEmpty(location))
                         query = query.Where(c => c.Location == location);
 
-                    results = query.Select(c => new SearchResultViewModel
+                    results = query.Select(u => new SearchResultViewModel
                     {
-                        ClubId = c.ClubID,
-                        Name = c.ClubName,
+                        ClubId = u.ClubID,
+                        Name = u.ClubName,
                         Level = "N/A",
-                        Location = c.Location ?? "Not specified",
+                        Location = u.Location ?? "Not specified",
                         Schedule = "N/A",
                         Distance = distance ?? 0,
                         Type = "Club"

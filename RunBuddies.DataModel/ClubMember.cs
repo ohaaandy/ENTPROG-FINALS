@@ -9,12 +9,9 @@ namespace RunBuddies.DataModel
 {
     public class ClubMember
     {
-        [Key]
         public int ClubMemberID { get; set; }
-
-        public string UserID { get; set; }    //FK
-        public User User { get; set; }     //Navigation
-
-        public List<Club> Clubs { get; set; } //many to one
+        public string UserID { get; set; }
+        public User User { get; set; }
+        public List<Club> Clubs { get; set; }
     }
 }

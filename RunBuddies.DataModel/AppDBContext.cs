@@ -69,8 +69,17 @@ namespace RunBuddies.DataModel
 
                 foreach (var user in users)
                 {
-                    await userManager.CreateAsync(user, "Password123!");
+                    var result = await userManager.CreateAsync(user, "Password123!");
+                    if (!result.Succeeded)
+                    {
+                        // Log the error or handle it appropriately
+                        Console.WriteLine($"Failed to create user {user.UserName}: {string.Join(", ", result.Errors)}");
+                    }
                 }
+
+                // Verify that users were actually created
+                var createdUsers = await Users.ToListAsync();
+                Console.WriteLine($"Created {createdUsers.Count} users.");
             }
         }
 
@@ -95,11 +104,11 @@ namespace RunBuddies.DataModel
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<ClubMember>()
-                .HasOne(p => p.User)
-                .WithMany(p => p.ClubMembers)
-                .HasForeignKey(p => p.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Modified: Many-to-Many relationship between Club and ClubMember
+            modelBuilder.Entity<Club>()
+                .HasMany(c => c.ClubMembers)
+                .WithMany(m => m.Clubs)
+                .UsingEntity(j => j.ToTable("ClubMemberships"));
 
             modelBuilder.Entity<Club>()
                 .HasOne(p => p.ClubModerator)
@@ -107,11 +116,12 @@ namespace RunBuddies.DataModel
                 .HasForeignKey(p => p.ClubModeratorID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Club>()
-                .HasOne(p => p.ClubMember)
-                .WithMany(p => p.Clubs)
-                .HasForeignKey(p => p.ClubMemberID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Remove this as it's now a many-to-many relationship
+            // modelBuilder.Entity<Club>()
+            //     .HasOne(p => p.ClubMember)
+            //     .WithMany(p => p.Clubs)
+            //     .HasForeignKey(p => p.ClubMemberID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Event>()
                 .HasOne(p => p.User)
@@ -131,7 +141,7 @@ namespace RunBuddies.DataModel
                 .HasForeignKey<Leaderboard>(p => p.EventID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Updated BuddyPartner relationships
+            // BuddyPartner relationships
             modelBuilder.Entity<BuddyPartner>()
                 .HasOne(bp => bp.User1)
                 .WithMany()
