@@ -1,7 +1,7 @@
 ﻿@model MyBuddiesViewModel
 
 @{
-    ViewData["Title"] = "My Buddies";
+    ViewData["Title"] = "My Running Buddies";
 }
 
 <h2>My Running Buddies</h2>
@@ -23,12 +23,8 @@
                         </p>
                         <div class="mb-3">
                             <strong>Contact:</strong><br>
-                            <a href="mailto:@buddy.Email" class="card-link">
-                                <i class="fas fa-envelope"></i> Email
-                            </a>
-                            <a href="tel:@buddy.PhoneNumber" class="card-link">
-                                <i class="fas fa-phone"></i> Call
-                            </a>
+                            <a href="mailto:@buddy.Email" class="card-link">Email</a>
+                            <a href="tel:@buddy.PhoneNumber" class="card-link">Call</a>
                         </div>
                         <div class="mb-3">
                             <strong>Recent Sessions:</strong>
@@ -52,6 +48,11 @@
                         <a href="@Url.Action("ScheduleSession", "Buddy", new { buddyId = buddy.UserId })" class="btn btn-primary">
                             Schedule a Run
                         </a>
+                        <form asp-action="RemoveBuddy" asp-route-buddyPartnerId="@buddy.BuddyPartnerId" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to remove this buddy?');">
+                                Remove Buddy
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

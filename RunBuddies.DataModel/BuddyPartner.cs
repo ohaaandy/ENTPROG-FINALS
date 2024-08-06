@@ -11,8 +11,10 @@ namespace RunBuddies.DataModel
     {
         [Key]
         public int BuddyID { get; set; }
-        public string UserID { get; set; }     // This is the foreign key
-        public User User { get; set; }      // This is the navigation property
-        public List<BuddySession> BuddySessions { get; set; }   //one to many
+        public string User1ID { get; set; }
+        public string User2ID { get; set; }
+        public User User1 { get; set; }
+        public User User2 { get; set; }
+        public List<BuddySession> BuddySessions { get; set; }
     }
 }

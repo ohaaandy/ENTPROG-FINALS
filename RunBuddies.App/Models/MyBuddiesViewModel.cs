@@ -7,6 +7,7 @@
 
     public class BuddyDetailViewModel
     {
+        public int BuddyPartnerId { get; set; }
         public string UserId { get; set; }
         public string FullName { get; set; }
         public string RunnerLevel { get; set; }

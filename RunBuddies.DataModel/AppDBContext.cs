@@ -88,71 +88,68 @@ namespace RunBuddies.DataModel
         {
             base.OnModelCreating(modelBuilder);
 
-            //codes for implementing entity relationships
-            //user to club moderator m to o
+            // Existing relationships
             modelBuilder.Entity<ClubModerator>()
                 .HasOne(p => p.User)
                 .WithMany(p => p.ClubModerators)
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //user to to club member
             modelBuilder.Entity<ClubMember>()
                 .HasOne(p => p.User)
                 .WithMany(p => p.ClubMembers)
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //club moderator to club
             modelBuilder.Entity<Club>()
                 .HasOne(p => p.ClubModerator)
                 .WithMany(p => p.Clubs)
                 .HasForeignKey(p => p.ClubModeratorID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //club member to club
             modelBuilder.Entity<Club>()
                 .HasOne(p => p.ClubMember)
                 .WithMany(p => p.Clubs)
                 .HasForeignKey(p => p.ClubMemberID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //User to Event
             modelBuilder.Entity<Event>()
                 .HasOne(p => p.User)
                 .WithMany(p => p.Events)
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Club to Event
             modelBuilder.Entity<Event>()
                 .HasOne(p => p.Club)
                 .WithMany(p => p.Events)
                 .HasForeignKey(p => p.ClubID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Event to Leaderboard o to o
             modelBuilder.Entity<Leaderboard>()
                 .HasOne(p => p.Events)
                 .WithOne(p => p.Leaderboards)
                 .HasForeignKey<Leaderboard>(p => p.EventID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //User to Buddy partner o to m
+            // Updated BuddyPartner relationships
             modelBuilder.Entity<BuddyPartner>()
-                .HasOne(p => p.User)
-                .WithMany(p => p.BuddyPartners)
-                .HasForeignKey(p => p.UserID)
+                .HasOne(bp => bp.User1)
+                .WithMany()
+                .HasForeignKey(bp => bp.User1ID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Buddy partner to Buddy session
+            modelBuilder.Entity<BuddyPartner>()
+                .HasOne(bp => bp.User2)
+                .WithMany()
+                .HasForeignKey(bp => bp.User2ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<BuddySession>()
                 .HasOne(p => p.BuddyPartner)
                 .WithMany(p => p.BuddySessions)
                 .HasForeignKey(p => p.BuddyID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Verification to Buddy session o to o
             modelBuilder.Entity<BuddySession>()
                 .HasOne(p => p.Verification)
                 .WithOne(p => p.BuddySessions)
@@ -160,10 +157,10 @@ namespace RunBuddies.DataModel
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<BuddyInvitation>()
-        .HasOne(bi => bi.Sender)
-        .WithMany(u => u.SentBuddyInvitations)
-        .HasForeignKey(bi => bi.SenderID)
-        .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(bi => bi.Sender)
+                .WithMany(u => u.SentBuddyInvitations)
+                .HasForeignKey(bi => bi.SenderID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<BuddyInvitation>()
                 .HasOne(bi => bi.Receiver)

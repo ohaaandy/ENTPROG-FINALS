@@ -74,9 +74,9 @@ namespace RunBuddies.App.Controllers
         }
 
         [HttpPost]
-        public IActionResult RespondToInvitation(int invitationId, bool accept)
+        public async Task<IActionResult> RespondToInvitation(int invitationId, bool accept)
         {
-            var invitation = _context.BuddyInvitations.Find(invitationId);
+            var invitation = await _context.BuddyInvitations.FindAsync(invitationId);
             if (invitation == null)
             {
                 return NotFound();
@@ -86,20 +86,29 @@ namespace RunBuddies.App.Controllers
             {
                 invitation.Status = InvitationStatus.Accepted;
 
+                // Create a new BuddyPartner entry
                 var buddyPartnership = new BuddyPartner
                 {
-                    UserID = invitation.SenderID,
-                    User = _context.Users.Find(invitation.ReceiverID)
+                    User1ID = invitation.SenderID,
+                    User2ID = invitation.ReceiverID
                 };
 
                 _context.BuddyPartners.Add(buddyPartnership);
+
+                // Optionally, you can also create a reverse partnership
+                // var reverseBuddyPartnership = new BuddyPartner
+                // {
+                //     User1ID = invitation.ReceiverID,
+                //     User2ID = invitation.SenderID
+                // };
+                // _context.BuddyPartners.Add(reverseBuddyPartnership);
             }
             else
             {
                 invitation.Status = InvitationStatus.Rejected;
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = accept ? "Invitation accepted" : "Invitation rejected" });
         }
@@ -107,42 +116,68 @@ namespace RunBuddies.App.Controllers
         public async Task<IActionResult> MyBuddies()
         {
             var currentUser = await _userManager.GetUserAsync(User);
+
             var buddyPartnerships = await _context.BuddyPartners
-                .Where(bp => bp.UserID == currentUser.Id)
-                .Include(bp => bp.User)
+                .Where(bp => bp.User1ID == currentUser.Id || bp.User2ID == currentUser.Id)
+                .Include(bp => bp.User1)
+                .Include(bp => bp.User2)
                 .Include(bp => bp.BuddySessions)
                 .ToListAsync();
 
             var viewModel = new MyBuddiesViewModel
             {
-                Buddies = buddyPartnerships.Select(bp => new BuddyDetailViewModel
+                Buddies = buddyPartnerships.Select(bp =>
                 {
-                    UserId = bp.User.Id,
-                    FullName = $"{bp.User.FirstName} {bp.User.LastName}",
-                    RunnerLevel = bp.User.RunnerLevel,
-                    Location = bp.User.Location,
-                    PreferredSchedule = bp.User.Schedule?.ToString("dddd"),
-                    PreferredDistance = bp.User.Distance ?? 0,
-                    Email = bp.User.Email,
-                    PhoneNumber = bp.User.PhoneNumber,
-                    RecentSessions = bp.BuddySessions
-                        .OrderByDescending(bs => bs.DateTime)
-                        .Take(3)
-                        .Select(bs => new BuddySessionViewModel
-                        {
-                            DateTime = bs.DateTime,
-                            Location = bs.Location,
-                            Description = bs.Description
-                        })
-                        .ToList()
+                    var buddy = bp.User1ID == currentUser.Id ? bp.User2 : bp.User1;
+                    return new BuddyDetailViewModel
+                    {
+                        BuddyPartnerId = bp.BuddyID,
+                        UserId = buddy.Id,
+                        FullName = $"{buddy.FirstName} {buddy.LastName}",
+                        RunnerLevel = buddy.RunnerLevel,
+                        Location = buddy.Location,
+                        PreferredSchedule = buddy.Schedule?.ToString("dddd"),
+                        PreferredDistance = buddy.Distance ?? 0,
+                        Email = buddy.Email,
+                        PhoneNumber = buddy.PhoneNumber,
+                        RecentSessions = bp.BuddySessions
+                            .OrderByDescending(bs => bs.DateTime)
+                            .Take(3)
+                            .Select(bs => new BuddySessionViewModel
+                            {
+                                DateTime = bs.DateTime,
+                                Location = bs.Location,
+                                Description = bs.Description
+                            })
+                            .ToList()
+                    };
                 }).ToList()
             };
 
             return View(viewModel);
         }
-    
 
-    private string GetCurrentUserId()//Must be Authenticated to work
+        [HttpPost]
+        public async Task<IActionResult> RemoveBuddy(int buddyPartnerId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var buddyPartnership = await _context.BuddyPartners
+                .FirstOrDefaultAsync(bp => bp.BuddyID == buddyPartnerId &&
+                                           (bp.User1ID == currentUser.Id || bp.User2ID == currentUser.Id));
+
+            if (buddyPartnership == null)
+            {
+                return NotFound();
+            }
+
+            _context.BuddyPartners.Remove(buddyPartnership);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(MyBuddies));
+        }
+
+
+        private string GetCurrentUserId()//Must be Authenticated to work
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim != null)
