@@ -18,7 +18,7 @@
             <dt class="col-sm-4">Contact Email:</dt>
             <dd class="col-sm-8">@Model.Club.ContactEmail</dd>
         </dl>
-        <form asp-action="UpdateClub" method="post">
+        <form asp-action="UpdateClub" asp-controller="Club" method="post">
             <input type="hidden" name="ClubID" value="@Model.Club.ClubID" />
             <div class="form-group">
                 <label for="ClubName">Name:</label>
@@ -41,23 +41,22 @@
     </div>
 
     <div class="col-md-6">
-        <h3>Membership Requests</h3>
-        @if (Model.MemberRequests != null && Model.MemberRequests.Any())
+        <h3 class="mt-4">Club Members</h3>
+        @if (Model.Club.ClubMembers != null && Model.Club.ClubMembers.Any())
         {
             <ul class="list-group">
-                @foreach (var request in Model.MemberRequests)
+                @foreach (var member in Model.Club.ClubMembers)
                 {
                     <li class="list-group-item">
-                        @request.User.UserName
-                        <button class="btn btn-sm btn-success float-right accept-request" data-request-id="@request.ID">Accept</button>
-                        <button class="btn btn-sm btn-danger float-right mr-2 reject-request" data-request-id="@request.ID">Reject</button>
+                        @member.User.UserName
+                        <button class="btn btn-sm btn-danger float-right remove-member" data-club-id="@Model.Club.ClubID" data-member-id="@member.UserID">Remove</button>
                     </li>
                 }
             </ul>
         }
         else
         {
-            <p>No pending membership requests.</p>
+            <p>No members yet.</p>
         }
 
         <h3 class="mt-4">Club Members</h3>
@@ -121,36 +120,11 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('.accept-request').click(function () {
-                var requestId = $(this).data('request-id');
-                if (confirm('Are you sure you want to accept this membership request?')) {
-                    $.post('@Url.Action("AcceptMember")', { requestId: requestId }, function (result) {
-                        if (result.success) {
-                            location.reload();
-                        } else {
-                            alert('Failed to accept member: ' + result.message);
-                        }
-                    });
-                }
-            });
-
-            $('.reject-request').click(function () {
-                var requestId = $(this).data('request-id');
-                if (confirm('Are you sure you want to reject this membership request?')) {
-                    $.post('@Url.Action("RejectMember")', { requestId: requestId }, function (result) {
-                        if (result.success) {
-                            location.reload();
-                        } else {
-                            alert('Failed to reject member: ' + result.message);
-                        }
-                    });
-                }
-            });
-
             $('.remove-member').click(function () {
+                var clubId = $(this).data('club-id');
                 var memberId = $(this).data('member-id');
                 if (confirm('Are you sure you want to remove this member?')) {
-                    $.post('@Url.Action("RemoveMember")', { memberId: memberId }, function (result) {
+                    $.post('@Url.Action("RemoveMember")', { clubId: clubId, memberId: memberId }, function (result) {
                         if (result.success) {
                             location.reload();
                         } else {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RunBuddies.App.Models;
 using RunBuddies.DataModel;
 using System.Security.Claims;
@@ -11,11 +12,15 @@ namespace RunBuddies.App.Controllers
     public class SearchController : Controller
     {
         private readonly AppDBContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public SearchController(AppDBContext context)
+
+        public SearchController(AppDBContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
+
         [HttpGet]
         public IActionResult Filter(string searchType)
         {
@@ -140,10 +145,35 @@ namespace RunBuddies.App.Controllers
         }
 
         [HttpPost]
-        public IActionResult JoinClub(int id)
+        [Authorize]
+        public async Task<IActionResult> JoinClub(int id)
         {
-            // Implement join club logic
-            return Json(new { message = "Club joined successfully" });
+            var club = await _context.Clubs
+                .Include(c => c.ClubMembers)
+                .FirstOrDefaultAsync(c => c.ClubID == id);
+
+            if (club == null)
+            {
+                return Json(new { success = false, message = "Club not found." });
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (club.ClubMembers.Any(cm => cm.UserID == currentUser.Id))
+            {
+                return Json(new { success = false, message = "You are already a member of this club." });
+            }
+
+            var clubMember = new ClubMember
+            {
+                UserID = currentUser.Id,
+                User = currentUser
+            };
+
+            club.ClubMembers.Add(clubMember);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "You have successfully joined the club." });
         }
 
 

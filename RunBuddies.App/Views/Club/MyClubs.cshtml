@@ -1,0 +1,34 @@
+﻿@model List<ClubViewModel>
+
+<h2>My Clubs</h2>
+
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var club in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@club.ClubName</h5>
+                        <p class="card-text">Location: @club.Location</p>
+                        <p class="card-text">@(club.Description?.Length > 100 ? club.Description.Substring(0, 97) + "..." : club.Description)</p>
+                        @if (club.IsModerator)
+                        {
+                            <a asp-action="Manage" asp-route-id="@club.ClubID" class="btn btn-primary">Manage</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Details" asp-route-id="@club.ClubID" class="btn btn-info">View</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>You are not a member of any clubs yet.</p>
+    <a asp-controller="Search" asp-action="RunningClub" class="btn btn-primary">Find a Running Club</a>
+}

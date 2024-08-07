@@ -13,5 +13,7 @@ namespace RunBuddies.App.Models
         [Required]
         [EmailAddress]
         public string ContactEmail { get; set; }
+        public bool IsModerator { get; set; }
+        public bool IsMember { get; set; }
     }
 }

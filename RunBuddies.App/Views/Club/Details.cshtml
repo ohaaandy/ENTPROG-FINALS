@@ -1,0 +1,31 @@
+﻿@model ClubViewModel
+
+<h2>@Model.ClubName</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Club Details</h5>
+        <p class="card-text"><strong>Location:</strong> @Model.Location</p>
+        <p class="card-text"><strong>Description:</strong> @Model.Description</p>
+        <p class="card-text"><strong>Contact Email:</strong> @Model.ContactEmail</p>
+
+        @if (!Model.IsMember && !Model.IsModerator)
+        {
+            <form asp-action="JoinClub" asp-route-clubId="@Model.ClubID" method="post">
+                <button type="submit" class="btn btn-primary">Join Club</button>
+            </form>
+        }
+        else if (Model.IsMember && !Model.IsModerator)
+        {
+            <p>You are a member of this club.</p>
+        }
+        else if (Model.IsModerator)
+        {
+            <a asp-action="Manage" asp-route-id="@Model.ClubID" class="btn btn-primary">Manage Club</a>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="MyClubs" class="btn btn-secondary">Back to My Clubs</a>
+</div>
