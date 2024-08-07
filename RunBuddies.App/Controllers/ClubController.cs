@@ -23,13 +23,13 @@ namespace RunBuddies.App.Controllers
         [Authorize]
         public IActionResult Create()
         {
-            return View();
+            return View(new CreateClubViewModel());
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ClubViewModel model)
+        public async Task<IActionResult> Create(CreateClubViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -39,7 +39,8 @@ namespace RunBuddies.App.Controllers
                     ClubName = model.ClubName,
                     Location = model.Location,
                     Description = model.Description,
-                    ContactEmail = model.ContactEmail
+                    ContactEmail = model.ContactEmail,
+                    CommunicationGroupLink = model.CommunicationGroupLink // This can be null or empty
                 };
                 var clubModerator = new ClubModerator
                 {
@@ -62,6 +63,28 @@ namespace RunBuddies.App.Controllers
                 return RedirectToAction(nameof(Manage), new { id = club.ClubID });
             }
             return View(model);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> MyClubs()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var userClubs = await _context.Clubs
+                .Where(c => c.ClubMembers.Any(cm => cm.UserID == currentUser.Id) || c.ClubModerator.UserID == currentUser.Id)
+                .Select(c => new ClubViewModel
+                {
+                    ClubID = c.ClubID,
+                    ClubName = c.ClubName,
+                    Location = c.Location,
+                    Description = c.Description,
+                    ContactEmail = c.ContactEmail,
+                    CommunicationGroupLink = c.CommunicationGroupLink,
+                    IsModerator = c.ClubModerator.UserID == currentUser.Id,
+                    IsMember = c.ClubMembers.Any(cm => cm.UserID == currentUser.Id) || c.ClubModerator.UserID == currentUser.Id
+                })
+                .ToListAsync();
+
+            return View(userClubs);
         }
         [Authorize]
         public async Task<IActionResult> Manage(int id)
@@ -95,6 +118,11 @@ namespace RunBuddies.App.Controllers
                     .ToListAsync(),
                 IsModerator = isModerator
             };
+
+            if (viewModel.Club == null)
+            {
+                return NotFound("Club not found.");
+            }
 
             return View(viewModel);
         }
@@ -167,7 +195,6 @@ namespace RunBuddies.App.Controllers
                     club.Location = model.Location;
                     club.Description = model.Description;
                     club.ContactEmail = model.ContactEmail;
-                    club.CommunicationGroupLink = model.CommunicationGroupLink;
 
                     await _context.SaveChangesAsync();
                 }
@@ -272,55 +299,65 @@ namespace RunBuddies.App.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateClub(ClubViewModel model)
+        public async Task<IActionResult> UpdateClub(Club club)
         {
             if (!ModelState.IsValid)
             {
-                return View("Manage", model);
+                var viewModel = new ClubManageViewModel
+                {
+                    Club = club,
+                    MemberRequests = await _context.ClubMembershipRequests
+                        .Where(r => r.ClubID == club.ClubID && r.Status == MembershipRequestStatus.Pending)
+                        .Include(r => r.User)
+                        .ToListAsync()
+                };
+                return View("Manage", viewModel);
             }
 
-            var club = await _context.Clubs
+            var existingClub = await _context.Clubs
                 .Include(c => c.ClubModerator)
-                .FirstOrDefaultAsync(c => c.ClubID == model.ClubID);
+                .Include(c => c.ClubMembers)
+                .Include(c => c.Events)
+                .FirstOrDefaultAsync(c => c.ClubID == club.ClubID);
 
-            if (club == null)
+            if (existingClub == null)
             {
                 return NotFound();
             }
 
             var currentUser = await _userManager.GetUserAsync(User);
-            if (club.ClubModerator == null || club.ClubModerator.UserID != currentUser.Id)
+            if (existingClub.ClubModerator == null || existingClub.ClubModerator.UserID != currentUser.Id)
             {
                 return Forbid();
             }
 
-            club.ClubName = model.ClubName;
-            club.Location = model.Location;
-            club.Description = model.Description;
-            club.ContactEmail = model.ContactEmail;
+            existingClub.ClubName = club.ClubName;
+            existingClub.Location = club.Location;
+            existingClub.Description = club.Description;
+            existingClub.ContactEmail = club.ContactEmail;
+            existingClub.CommunicationGroupLink = club.CommunicationGroupLink;
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Manage), new { id = club.ClubID });
-        }
-        public async Task<IActionResult> MyClubs()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            var userClubs = await _context.Clubs
-                .Where(c => c.ClubMembers.Any(cm => cm.UserID == currentUser.Id) || c.ClubModerator.UserID == currentUser.Id)
-                .Select(c => new ClubViewModel
-                {
-                    ClubID = c.ClubID,
-                    ClubName = c.ClubName,
-                    Location = c.Location,
-                    Description = c.Description,
-                    ContactEmail = c.ContactEmail,
-                    IsModerator = c.ClubModerator.UserID == currentUser.Id,
-                    IsMember = c.ClubMembers.Any(cm => cm.UserID == currentUser.Id) || c.ClubModerator.UserID == currentUser.Id
-                })
-                .ToListAsync();
+            var updatedViewModel = new ClubManageViewModel
+            {
+                Club = existingClub,
+                MemberRequests = await _context.ClubMembershipRequests
+                    .Where(r => r.ClubID == existingClub.ClubID && r.Status == MembershipRequestStatus.Pending)
+                    .Include(r => r.User)
+                    .ToListAsync()
+            };
 
-            return View(userClubs);
+            return View("Manage", updatedViewModel);
+        }
+
+        private async Task<Club> GetClubEntityAsync(int clubId)
+        {
+            return await _context.Clubs
+                .Include(c => c.ClubModerator)
+                .Include(c => c.ClubMembers)
+                .Include(c => c.Events)
+                .FirstOrDefaultAsync(c => c.ClubID == clubId);
         }
 
         [HttpPost]
@@ -372,6 +409,7 @@ namespace RunBuddies.App.Controllers
             var club = await _context.Clubs
                 .Include(c => c.ClubModerator)
                 .Include(c => c.ClubMembers)
+                .Include(c => c.Events)
                 .FirstOrDefaultAsync(c => c.ClubID == id);
 
             if (club == null)
@@ -388,8 +426,10 @@ namespace RunBuddies.App.Controllers
                 Location = club.Location,
                 Description = club.Description,
                 ContactEmail = club.ContactEmail,
+                CommunicationGroupLink = club.CommunicationGroupLink,
                 IsModerator = club.ClubModerator?.UserID == currentUser.Id,
-                IsMember = club.ClubMembers.Any(cm => cm.UserID == currentUser.Id)
+                IsMember = club.ClubMembers.Any(cm => cm.UserID == currentUser.Id),
+                Events = club.Events.ToList()  // Populate the Events property
             };
 
             return View(viewModel);

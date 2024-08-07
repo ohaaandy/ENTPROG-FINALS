@@ -1,149 +1,133 @@
 ﻿@model ClubManageViewModel
 
-<div class="club-container">
-    <h2>Manage Club: @Model.Club.ClubName</h2>
+<div class="container">
+    <h2 class="text-center mb-4">Manage Club: @Model.Club.ClubName</h2>
 
-    <div class="edit-club-section">
-        <h3>Edit Club Information</h3>
-        <form asp-action="Edit" method="post">
-            <input type="hidden" asp-for="Club.ClubID" />
-            <div class="form-group">
-                <label asp-for="Club.ClubName">Club Name</label>
-                <input asp-for="Club.ClubName" class="form-control" />
-                <span asp-validation-for="Club.ClubName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Club.Location">Location</label>
-                <input asp-for="Club.Location" class="form-control" />
-                <span asp-validation-for="Club.Location" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Club.Description">Description</label>
-                <textarea asp-for="Club.Description" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Club.Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Club.ContactEmail">Contact Email</label>
-                <input asp-for="Club.ContactEmail" class="form-control" />
-                <span asp-validation-for="Club.ContactEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Club.CommunicationGroupLink">Communication Group Link</label>
-                <input asp-for="Club.CommunicationGroupLink" class="form-control" />
-                <span asp-validation-for="Club.CommunicationGroupLink" class="text-danger"></span>
-            </div>
-            <button type="submit" class="btn btn-primary">Update Club Info</button>
-        </form>
-    </div>
-
-    @if (!string.IsNullOrEmpty(Model.Club.CommunicationGroupLink))
-    {
-        <div class="communication-group-section">
-            <h3>Stay Connected</h3>
-            <p>Join our communication group to connect with other members and stay updated on upcoming events and activities.</p>
-            <a href="@Model.Club.CommunicationGroupLink" target="_blank" class="btn btn-success">Join Group</a>
-        </div>
-    }
-
-    <div class="members-section">
-        <h3>Club Members</h3>
-        @if (Model.Club.ClubMembers != null && Model.Club.ClubMembers.Any())
-        {
-            <ul class="member-list">
-                @foreach (var member in Model.Club.ClubMembers)
-                {
-                    <li class="member-item">
-                        <span>@member.User.UserName</span>
-                        @if (member.UserID != Model.Club.ClubModerator.UserID)
-                        {
-                            <button class="btn btn-sm btn-danger remove-member" data-member-id="@member.UserID">Remove</button>
-                        }
-                        else
-                        {
-                            <span class="moderator-badge">Moderator</span>
-                        }
-                    </li>
-                }
-            </ul>
-        }
-        else
-        {
-            <p>No members yet.</p>
-        }
-    </div>
-
-    <div class="events-section">
-        <h3>Club Events</h3>
-        @if (Model.Club.Events != null && Model.Club.Events.Any())
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Event Name</th>
-                        <th>Date</th>
-                        <th>Location</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var evt in Model.Club.Events)
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Club Information</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Location:</strong> @Model.Club.Location</p>
+                    <p><strong>Description:</strong> @Model.Club.Description</p>
+                    <p><strong>Contact Email:</strong> @Model.Club.ContactEmail</p>
+                    @if (!string.IsNullOrEmpty(Model.Club.CommunicationGroupLink))
                     {
-                        <tr>
-                            <td>@evt.EventName</td>
-                            <td>@evt.DateTime.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>@evt.Location</td>
-                            <td>
-                                <a asp-action="EditEvent" asp-route-id="@evt.EventID" class="btn btn-sm btn-primary">Edit</a>
-                                <button class="btn btn-sm btn-danger delete-event" data-event-id="@evt.EventID">Delete</button>
-                            </td>
-                        </tr>
+                        <p><strong>Communication Group:</strong> <a href="@Model.Club.CommunicationGroupLink" target="_blank" class="btn btn-sm btn-success">Join Group</a></p>
                     }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>No events scheduled.</p>
-        }
-        <a asp-action="CreateEvent" asp-route-clubId="@Model.Club.ClubID" class="btn btn-success">Create New Event</a>
+                    <button id="editClubInfoBtn" class="btn btn-primary">Edit Club Info</button>
+                </div>
+            </div>
+
+            <div id="editClubInfoForm" style="display: none;">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Edit Club Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="UpdateClub" method="post">
+                            <input type="hidden" asp-for="Club.ClubID" />
+                            <div class="form-group">
+                                <label asp-for="Club.ClubName">Club Name</label>
+                                <input asp-for="Club.ClubName" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Club.Location">Location</label>
+                                <input asp-for="Club.Location" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Club.Description">Description</label>
+                                <textarea asp-for="Club.Description" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Club.ContactEmail">Contact Email</label>
+                                <input asp-for="Club.ContactEmail" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Club.CommunicationGroupLink">Communication Group Link (Optional)</label>
+                                <input asp-for="Club.CommunicationGroupLink" class="form-control" />
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Club Info</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Club Members</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Club.ClubMembers != null && Model.Club.ClubMembers.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var member in Model.Club.ClubMembers)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @member.User.UserName
+                                    @if (member.UserID != Model.Club.ClubModerator.UserID)
+                                    {
+                                        <button class="btn btn-sm btn-danger remove-member" data-member-id="@member.UserID">Remove</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">Moderator</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>No members yet.</p>
+                    }
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Club Events</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Club.Events != null && Model.Club.Events.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var evt in Model.Club.Events)
+                                {
+                                    <tr>
+                                        <td>@evt.EventName</td>
+                                        <td>@evt.DateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td>@evt.Location</td>
+                                        <td>
+                                            <a asp-action="EditEvent" asp-route-id="@evt.EventID" class="btn btn-sm btn-primary">Edit</a>
+                                            <button class="btn btn-sm btn-danger delete-event" data-event-id="@evt.EventID">Delete</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No events scheduled.</p>
+                    }
+                    <a asp-action="CreateEvent" asp-route-clubId="@Model.Club.ClubID" class="btn btn-success">Create New Event</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<style>
-    .club-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-
-    .edit-club-section, .communication-group-section, .members-section, .events-section {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-
-    .member-list {
-        list-style-type: none;
-        padding: 0;
-    }
-
-    .member-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .moderator-badge {
-        background-color: #007bff;
-        color: white;
-        padding: 2px 5px;
-        border-radius: 3px;
-        font-size: 0.8em;
-    }
-</style>
 
 @section Scripts {
     @{
@@ -151,6 +135,10 @@
     }
     <script>
         $(document).ready(function () {
+            $('#editClubInfoBtn').click(function () {
+                $('#editClubInfoForm').toggle();
+            });
+
             $('.remove-member').click(function () {
                 var memberId = $(this).data('member-id');
                 if (confirm('Are you sure you want to remove this member?')) {

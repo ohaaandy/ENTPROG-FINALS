@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RunBuddies.DataModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace RunBuddies.App.Models
 {
@@ -16,6 +17,6 @@ namespace RunBuddies.App.Models
         public bool IsModerator { get; set; }
         public bool IsMember { get; set; }
         public string CommunicationGroupLink { get; set; }
-
+        public List<Event> Events { get; set; }
     }
 }
