@@ -7,25 +7,9 @@ namespace RunBuddies.DataModel.Migrations
     /// <inheritdoc />
     public partial class UpdateClubMemberRelationship : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ClubMembers_AspNetUsers_UserID",
-                table: "ClubMembers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Clubs_ClubMembers_ClubMemberID",
-                table: "Clubs");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Clubs_ClubMemberID",
-                table: "Clubs");
-
-            migrationBuilder.DropColumn(
-                name: "ClubMemberID",
-                table: "Clubs");
-
+            // First, create the new ClubMemberships table
             migrationBuilder.CreateTable(
                 name: "ClubMemberships",
                 columns: table => new
@@ -41,19 +25,40 @@ namespace RunBuddies.DataModel.Migrations
                         column: x => x.ClubMembersClubMemberID,
                         principalTable: "ClubMembers",
                         principalColumn: "ClubMemberID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ClubMemberships_Clubs_ClubsClubID",
                         column: x => x.ClubsClubID,
                         principalTable: "Clubs",
                         principalColumn: "ClubID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_ClubMemberships_ClubsClubID",
-                table: "ClubMemberships",
-                column: "ClubsClubID");
+            // Populate the new ClubMemberships table with existing relationships
+            migrationBuilder.Sql(@"
+            INSERT INTO ClubMemberships (ClubsClubID, ClubMembersClubMemberID)
+            SELECT ClubID, ClubMemberID 
+            FROM Clubs 
+            WHERE ClubMemberID IS NOT NULL AND ClubMemberID != 0
+        ");
+
+            // Now it's safe to drop the old relationship
+            migrationBuilder.DropForeignKey(
+                name: "FK_Clubs_ClubMembers_ClubMemberID",
+                table: "Clubs");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Clubs_ClubMemberID",
+                table: "Clubs");
+
+            migrationBuilder.DropColumn(
+                name: "ClubMemberID",
+                table: "Clubs");
+
+            // Update the ClubMembers to AspNetUsers relationship
+            migrationBuilder.DropForeignKey(
+                name: "FK_ClubMembers_AspNetUsers_UserID",
+                table: "ClubMembers");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ClubMembers_AspNetUsers_UserID",
@@ -61,12 +66,17 @@ namespace RunBuddies.DataModel.Migrations
                 column: "UserID",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClubMemberships_ClubsClubID",
+                table: "ClubMemberships",
+                column: "ClubsClubID");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Revert the changes in reverse order
             migrationBuilder.DropForeignKey(
                 name: "FK_ClubMembers_AspNetUsers_UserID",
                 table: "ClubMembers");
@@ -78,8 +88,15 @@ namespace RunBuddies.DataModel.Migrations
                 name: "ClubMemberID",
                 table: "Clubs",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);  // Make it nullable to avoid issues with existing data
+
+            // Populate the ClubMemberID column with data from the ClubMemberships table
+            migrationBuilder.Sql(@"
+            UPDATE c
+            SET c.ClubMemberID = cm.ClubMembersClubMemberID
+            FROM Clubs c
+            JOIN ClubMemberships cm ON c.ClubID = cm.ClubsClubID
+        ");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Clubs_ClubMemberID",
@@ -87,19 +104,19 @@ namespace RunBuddies.DataModel.Migrations
                 column: "ClubMemberID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_ClubMembers_AspNetUsers_UserID",
-                table: "ClubMembers",
-                column: "UserID",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
                 name: "FK_Clubs_ClubMembers_ClubMemberID",
                 table: "Clubs",
                 column: "ClubMemberID",
                 principalTable: "ClubMembers",
                 principalColumn: "ClubMemberID",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ClubMembers_AspNetUsers_UserID",
+                table: "ClubMembers",
+                column: "UserID",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }
     }

@@ -104,7 +104,7 @@ namespace RunBuddies.DataModel
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Modified: Many-to-Many relationship between Club and ClubMember
+            // Many-to-Many relationship between Club and ClubMember
             modelBuilder.Entity<Club>()
                 .HasMany(c => c.ClubMembers)
                 .WithMany(m => m.Clubs)
@@ -115,13 +115,6 @@ namespace RunBuddies.DataModel
                 .WithMany(p => p.Clubs)
                 .HasForeignKey(p => p.ClubModeratorID)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Remove this as it's now a many-to-many relationship
-            // modelBuilder.Entity<Club>()
-            //     .HasOne(p => p.ClubMember)
-            //     .WithMany(p => p.Clubs)
-            //     .HasForeignKey(p => p.ClubMemberID)
-            //     .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Event>()
                 .HasOne(p => p.User)
@@ -177,6 +170,13 @@ namespace RunBuddies.DataModel
                 .WithMany(u => u.ReceivedBuddyInvitations)
                 .HasForeignKey(bi => bi.ReceiverID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Add configuration for ClubMember if needed
+            modelBuilder.Entity<ClubMember>()
+                .HasOne(cm => cm.User)
+                .WithMany(u => u.ClubMembers)
+                .HasForeignKey(cm => cm.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         //public DbSet<User> AspNetUsers { get; set; }
@@ -189,6 +189,8 @@ namespace RunBuddies.DataModel
         public DbSet<Verification> Verifications { get; set; }
         public DbSet<BuddySession> BuddySessions { get; set; }
         public DbSet<BuddyInvitation> BuddyInvitations { get; set; }
+        public DbSet<ClubMembership> ClubMemberships { get; set; }
+
 
     }
 }
