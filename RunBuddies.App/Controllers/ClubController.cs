@@ -40,7 +40,7 @@ namespace RunBuddies.App.Controllers
                     Location = model.Location,
                     Description = model.Description,
                     ContactEmail = model.ContactEmail,
-                    CommunicationGroupLink = model.CommunicationGroupLink // This can be null or empty
+                    CommunicationGroupLink = string.IsNullOrWhiteSpace(model.CommunicationGroupLink) ? null : model.CommunicationGroupLink
                 };
                 var clubModerator = new ClubModerator
                 {
@@ -119,9 +119,9 @@ namespace RunBuddies.App.Controllers
                 IsModerator = isModerator
             };
 
-            if (viewModel.Club == null)
+            if (TempData["SuccessMessage"] != null)
             {
-                return NotFound("Club not found.");
+                viewModel.SuccessMessage = TempData["SuccessMessage"].ToString();
             }
 
             return View(viewModel);
@@ -195,6 +195,7 @@ namespace RunBuddies.App.Controllers
                     club.Location = model.Location;
                     club.Description = model.Description;
                     club.ContactEmail = model.ContactEmail;
+                    club.CommunicationGroupLink = string.IsNullOrWhiteSpace(model.CommunicationGroupLink) ? null : model.CommunicationGroupLink;
 
                     await _context.SaveChangesAsync();
                 }

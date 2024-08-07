@@ -7,6 +7,7 @@ namespace RunBuddies.App.Models
         public Club Club { get; set; }
         public List<ClubMembershipRequest> MemberRequests { get; set; }
         public bool IsModerator { get; set; }
+        public string SuccessMessage { get; set; }
 
     }
 }
