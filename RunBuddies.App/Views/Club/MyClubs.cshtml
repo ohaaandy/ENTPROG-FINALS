@@ -17,9 +17,15 @@
                         {
                             <a asp-action="Manage" asp-route-id="@club.ClubID" class="btn btn-primary">Manage</a>
                         }
-                        else
+                        else if (club.IsMember)
                         {
                             <a asp-action="Details" asp-route-id="@club.ClubID" class="btn btn-info">View</a>
+                        }
+                        else
+                        {
+                            <form asp-action="JoinClub" asp-route-clubId="@club.ClubID" method="post">
+                                <button type="submit" class="btn btn-success">Join</button>
+                            </form>
                         }
                     </div>
                 </div>

@@ -49,6 +49,14 @@ namespace RunBuddies.App.Controllers
                 club.ClubModerator = clubModerator;
                 club.ClubModeratorID = clubModerator.ClubModeratorID;
 
+                // Add the creator as a member
+                var clubMember = new ClubMember
+                {
+                    UserID = currentUser.Id,
+                    User = currentUser
+                };
+                club.ClubMembers = new List<ClubMember> { clubMember };
+
                 _context.Clubs.Add(club);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Manage), new { id = club.ClubID });
@@ -71,7 +79,9 @@ namespace RunBuddies.App.Controllers
             }
 
             var currentUser = await _userManager.GetUserAsync(User);
-            if (club.ClubModerator == null || club.ClubModerator.UserID != currentUser.Id)
+            var isModerator = club.ClubModerator?.UserID == currentUser.Id;
+
+            if (!isModerator)
             {
                 return Forbid();
             }
@@ -82,7 +92,8 @@ namespace RunBuddies.App.Controllers
                 MemberRequests = await _context.ClubMembershipRequests
                     .Where(r => r.ClubID == id && r.Status == MembershipRequestStatus.Pending)
                     .Include(r => r.User)
-                    .ToListAsync()
+                    .ToListAsync(),
+                IsModerator = isModerator
             };
 
             return View(viewModel);
@@ -303,7 +314,8 @@ namespace RunBuddies.App.Controllers
                     Location = c.Location,
                     Description = c.Description,
                     ContactEmail = c.ContactEmail,
-                    IsModerator = c.ClubModerator.UserID == currentUser.Id
+                    IsModerator = c.ClubModerator.UserID == currentUser.Id,
+                    IsMember = c.ClubMembers.Any(cm => cm.UserID == currentUser.Id) || c.ClubModerator.UserID == currentUser.Id
                 })
                 .ToListAsync();
 
@@ -316,13 +328,30 @@ namespace RunBuddies.App.Controllers
         {
             var club = await _context.Clubs
                 .Include(c => c.ClubMembers)
+                .Include(c => c.ClubModerator)
                 .FirstOrDefaultAsync(c => c.ClubID == clubId);
+
+            if (club == null)
+            {
+                return Json(new { success = false, message = "Club not found." });
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (club.ClubModerator.UserID != currentUser.Id)
+            {
+                return Json(new { success = false, message = "You are not authorized to remove members." });
+            }
 
             var member = club.ClubMembers.FirstOrDefault(m => m.UserID == memberId);
 
-            if (club == null || member == null)
+            if (member == null)
             {
-                return Json(new { success = false, message = "Club or member not found." });
+                return Json(new { success = false, message = "Member not found." });
+            }
+
+            if (member.UserID == club.ClubModerator.UserID)
+            {
+                return Json(new { success = false, message = "You cannot remove yourself as the moderator." });
             }
 
             club.ClubMembers.Remove(member);
