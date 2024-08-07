@@ -3,18 +3,47 @@
 <div class="club-container">
     <h2>Manage Club: @Model.Club.ClubName</h2>
 
-    <div class="manage-section">
-        <h3>Manage Club</h3>
-        <button class="btn btn-primary" onclick="location.href='@Url.Action("Edit", "Club", new { id = Model.Club.ClubID })'">Edit Club Info</button>
-        <button class="btn btn-success" onclick="location.href='@Url.Action("CreateEvent", "Club", new { clubId = Model.Club.ClubID })'">Create Event</button>
-        <button class="btn btn-info" onclick="location.href='@Url.Action("InviteMembers", "Club", new { clubId = Model.Club.ClubID })'">Invite Members</button>
+    <div class="edit-club-section">
+        <h3>Edit Club Information</h3>
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Club.ClubID" />
+            <div class="form-group">
+                <label asp-for="Club.ClubName">Club Name</label>
+                <input asp-for="Club.ClubName" class="form-control" />
+                <span asp-validation-for="Club.ClubName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Club.Location">Location</label>
+                <input asp-for="Club.Location" class="form-control" />
+                <span asp-validation-for="Club.Location" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Club.Description">Description</label>
+                <textarea asp-for="Club.Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Club.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Club.ContactEmail">Contact Email</label>
+                <input asp-for="Club.ContactEmail" class="form-control" />
+                <span asp-validation-for="Club.ContactEmail" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Club.CommunicationGroupLink">Communication Group Link</label>
+                <input asp-for="Club.CommunicationGroupLink" class="form-control" />
+                <span asp-validation-for="Club.CommunicationGroupLink" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Club Info</button>
+        </form>
     </div>
 
-    <div class="club-info">
-        <p><strong>Location:</strong> @Model.Club.Location</p>
-        <p><strong>Description:</strong> @Model.Club.Description</p>
-        <p><strong>Contact Email:</strong> @Model.Club.ContactEmail</p>
-    </div>
+    @if (!string.IsNullOrEmpty(Model.Club.CommunicationGroupLink))
+    {
+        <div class="communication-group-section">
+            <h3>Stay Connected</h3>
+            <p>Join our communication group to connect with other members and stay updated on upcoming events and activities.</p>
+            <a href="@Model.Club.CommunicationGroupLink" target="_blank" class="btn btn-success">Join Group</a>
+        </div>
+    }
 
     <div class="members-section">
         <h3>Club Members</h3>
@@ -76,6 +105,7 @@
         {
             <p>No events scheduled.</p>
         }
+        <a asp-action="CreateEvent" asp-route-clubId="@Model.Club.ClubID" class="btn btn-success">Create New Event</a>
     </div>
 </div>
 
@@ -84,27 +114,13 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
+    }
+
+    .edit-club-section, .communication-group-section, .members-section, .events-section {
         background-color: #f8f9fa;
         border-radius: 8px;
-    }
-
-    .manage-section {
+        padding: 20px;
         margin-bottom: 20px;
-        padding: 15px;
-        background-color: #e9ecef;
-        border-radius: 5px;
-    }
-
-        .manage-section button {
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
-    .club-info, .members-section, .events-section {
-        margin-bottom: 20px;
-        background-color: white;
-        padding: 15px;
-        border-radius: 5px;
     }
 
     .member-list {
@@ -130,6 +146,9 @@
 </style>
 
 @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
         $(document).ready(function () {
             $('.remove-member').click(function () {

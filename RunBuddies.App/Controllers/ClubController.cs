@@ -167,6 +167,7 @@ namespace RunBuddies.App.Controllers
                     club.Location = model.Location;
                     club.Description = model.Description;
                     club.ContactEmail = model.ContactEmail;
+                    club.CommunicationGroupLink = model.CommunicationGroupLink;
 
                     await _context.SaveChangesAsync();
                 }

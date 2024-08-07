@@ -19,5 +19,7 @@ namespace RunBuddies.DataModel
         public ClubModerator ClubModerator { get; set; }
         public List<ClubMember> ClubMembers { get; set; } // Changed from single ClubMember to List
         public List<Event> Events { get; set; }
+        public string CommunicationGroupLink { get; set; }
+
     }
 }
