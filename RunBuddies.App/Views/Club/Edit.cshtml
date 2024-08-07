@@ -1,9 +1,9 @@
-﻿@model CreateClubViewModel
-@{
-    ViewData["Title"] = "Create Club";
-}
-<h2>Create Club</h2>
-<form asp-action="Create" method="post">
+﻿@model ClubViewModel
+
+<h2>Edit Club</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="ClubID" />
     <div class="form-group">
         <label asp-for="ClubName" class="control-label"></label>
         <input asp-for="ClubName" class="form-control" />
@@ -15,21 +15,7 @@
             <option value="" disabled selected>Select City</option>
             <option value="Manila">Manila</option>
             <option value="Quezon City">Quezon City</option>
-            <option value="Caloocan">Caloocan</option>
-            <option value="Las Piñas">Las Piñas</option>
-            <option value="Makati">Makati</option>
-            <option value="Malabon">Malabon</option>
-            <option value="Mandaluyong">Mandaluyong</option>
-            <option value="Marikina">Marikina</option>
-            <option value="Muntinlupa">Muntinlupa</option>
-            <option value="Navotas">Navotas</option>
-            <option value="Parañaque">Parañaque</option>
-            <option value="Pasay">Pasay</option>
-            <option value="Pasig">Pasig</option>
-            <option value="San Juan">San Juan</option>
-            <option value="Taguig">Taguig</option>
-            <option value="Valenzuela">Valenzuela</option>
-            <option value="Pateros">Pateros</option>
+            <!-- Add other cities as in your Create view -->
         </select>
         <span asp-validation-for="Location" class="text-danger"></span>
     </div>
@@ -43,11 +29,12 @@
         <input asp-for="ContactEmail" class="form-control" />
         <span asp-validation-for="ContactEmail" class="text-danger"></span>
     </div>
-    <div class="button-group">
-        <a href="@Url.Action("Results", "Search")" class="btn btn-secondary">Back</a>
-        <input type="submit" value="Create" class="btn btn-primary" />
+    <div class="form-group">
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a asp-action="Manage" asp-route-id="@Model.ClubID" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

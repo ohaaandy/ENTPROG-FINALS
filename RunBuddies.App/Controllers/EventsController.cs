@@ -22,14 +22,16 @@ namespace RunBuddies.Controllers
                 .Select(e => new EventViewModel
                 {
                     EventID = e.EventID,
+                    ClubID = e.ClubID,
                     EventName = e.EventName,
+                    EventType = e.EventType,
                     DateTime = e.DateTime,
                     Location = e.Location,
                     Description = e.Description,
-                    OrganizerName = e.User.UserName // Assuming User has a Username property // Add Event image
+                    OrganizerName = e.User.UserName // Assuming User has a UserName property
+                                                    // HasUserJoined can be set here if needed
                 })
                 .ToListAsync();
-
             return View(events);
         }
 
@@ -39,18 +41,19 @@ namespace RunBuddies.Controllers
             {
                 return NotFound();
             }
-
             var eventViewModel = await _context.Events
                 .Where(e => e.EventID == id)
                 .Select(e => new EventViewModel
                 {
                     EventID = e.EventID,
+                    ClubID = e.ClubID,
                     EventName = e.EventName,
+                    EventType = e.EventType,
                     DateTime = e.DateTime,
                     Location = e.Location,
                     Description = e.Description,
                     OrganizerName = e.User.UserName,
-                    // You could set HasUserJoined here based on some logic
+                    // HasUserJoined can be set here if needed
                 })
                 .FirstOrDefaultAsync();
 

@@ -6,6 +6,7 @@ namespace RunBuddies.ViewModels
     public class EventViewModel
     {
         public int ClubID { get; set; }
+        public int EventID { get; set; }
 
         [Required]
         public string EventName { get; set; }
@@ -20,5 +21,7 @@ namespace RunBuddies.ViewModels
         public string Location { get; set; }
 
         public string Description { get; set; }
+        public string OrganizerName { get; set; }
+        public bool HasUserJoined { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RunBuddies.DataModel;
 
@@ -11,9 +12,11 @@ using RunBuddies.DataModel;
 namespace RunBuddies.DataModel.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240807074605_SetupClubMemberships")]
+    partial class SetupClubMemberships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -317,36 +320,6 @@ namespace RunBuddies.DataModel.Migrations
                     b.HasIndex("ClubMemberID");
 
                     b.ToTable("ClubMemberships", (string)null);
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.ClubMembershipRequest", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("ClubID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RequestDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ClubID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("ClubMembershipRequests");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.ClubModerator", b =>
@@ -698,25 +671,6 @@ namespace RunBuddies.DataModel.Migrations
                     b.Navigation("Club");
 
                     b.Navigation("ClubMember");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.ClubMembershipRequest", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.Club", "Club")
-                        .WithMany()
-                        .HasForeignKey("ClubID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RunBuddies.DataModel.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Club");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.ClubModerator", b =>

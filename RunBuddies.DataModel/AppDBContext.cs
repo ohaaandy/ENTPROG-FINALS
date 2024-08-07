@@ -17,69 +17,47 @@ namespace RunBuddies.DataModel
             this.userManager = userManager;
         }
 
-        public async Task SeedSampleDataAsync()
+        public async Task SeedDataAsync()
         {
             if (!Users.Any())
             {
                 var users = new List<User>
+            {
+                new User
                 {
-                    new User
-                    {
-                        UserName = "john_doe",
-                        Email = "john@example.com",
-                        FirstName = "John",
-                        LastName = "Doe",
-                        Birthday = new DateOnly(1990, 1, 1),
-                        Gender = "Male",
-                        PhoneNumber = "1234567890",
-                        RunnerLevel = "Beginner",
-                        Schedule = new DateOnly(2023, 1, 2),
-                        Location = "Manila",
-                        Distance = 5
-                    },
-                    new User
-                    {
-                        UserName = "jane_smith",
-                        Email = "jane@example.com",
-                        FirstName = "Jane",
-                        LastName = "Smith",
-                        Birthday = new DateOnly(1992, 5, 15),
-                        Gender = "Female",
-                        PhoneNumber = "9876543210",
-                        RunnerLevel = "Intermediate",
-                        Schedule = new DateOnly(2023, 1, 4),
-                        Location = "Quezon City",
-                        Distance = 10
-                    },
-                    new User
-                    {
-                        UserName = "mike_johnson",
-                        Email = "mike@example.com",
-                        FirstName = "Mike",
-                        LastName = "Johnson",
-                        Birthday = new DateOnly(1988, 9, 30),
-                        Gender = "Male",
-                        PhoneNumber = "5555555555",
-                        RunnerLevel = "Advanced",
-                        Schedule = new DateOnly(2023, 1, 7),
-                        Location = "Makati",
-                        Distance = 15
-                    }
-                };
-
-                foreach (var user in users)
+                    UserName = "john_doe",
+                    Email = "john@example.com",
+                    FirstName = "John",
+                    LastName = "Doe",
+                    Birthday = new DateOnly(1990, 1, 1),
+                    Gender = "Male",
+                    PhoneNumber = "1234567890",
+                    RunnerLevel = "Beginner",
+                    Schedule = new DateOnly(2023, 1, 2),
+                    Location = "Manila",
+                    Distance = 5,
+                    EmailConfirmed = true // Set this to true so the user can log in without email confirmation
+                },
+                new User
                 {
-                    var result = await userManager.CreateAsync(user, "Password123!");
-                    if (!result.Succeeded)
-                    {
-                        // Log the error or handle it appropriately
-                        Console.WriteLine($"Failed to create user {user.UserName}: {string.Join(", ", result.Errors)}");
-                    }
-                }
+                    UserName = "jane_smith",
+                    Email = "jane@example.com",
+                    FirstName = "Jane",
+                    LastName = "Smith",
+                    Birthday = new DateOnly(1992, 5, 15),
+                    Gender = "Female",
+                    PhoneNumber = "9876543210",
+                    RunnerLevel = "Intermediate",
+                    Schedule = new DateOnly(2023, 1, 4),
+                    Location = "Quezon City",
+                    Distance = 10,
+                    EmailConfirmed = true
+                },
+                // Add more users as needed
+            };
 
-                // Verify that users were actually created
-                var createdUsers = await Users.ToListAsync();
-                Console.WriteLine($"Created {createdUsers.Count} users.");
+                Users.AddRange(users);
+                await SaveChangesAsync();
             }
         }
 
@@ -108,7 +86,20 @@ namespace RunBuddies.DataModel
             modelBuilder.Entity<Club>()
                 .HasMany(c => c.ClubMembers)
                 .WithMany(m => m.Clubs)
-                .UsingEntity(j => j.ToTable("ClubMemberships"));
+                .UsingEntity<ClubMembership>(
+                    j => j
+                        .HasOne(cm => cm.ClubMember)
+                        .WithMany()
+                        .HasForeignKey(cm => cm.ClubMemberID),
+                    j => j
+                        .HasOne(cm => cm.Club)
+                        .WithMany()
+                        .HasForeignKey(cm => cm.ClubID),
+                    j =>
+                    {
+                        j.ToTable("ClubMemberships");
+                        j.HasKey(t => new { t.ClubID, t.ClubMemberID });
+                    });
 
             modelBuilder.Entity<Club>()
                 .HasOne(p => p.ClubModerator)
@@ -190,6 +181,7 @@ namespace RunBuddies.DataModel
         public DbSet<BuddySession> BuddySessions { get; set; }
         public DbSet<BuddyInvitation> BuddyInvitations { get; set; }
         public DbSet<ClubMembership> ClubMemberships { get; set; }
+        public DbSet<ClubMembershipRequest> ClubMembershipRequests { get; set; }
 
 
     }

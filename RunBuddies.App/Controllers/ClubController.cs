@@ -20,7 +20,41 @@ namespace RunBuddies.App.Controllers
             _context = context;
             _userManager = userManager;
         }
+        [Authorize]
+        public IActionResult Create()
+        {
+            return View();
+        }
 
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ClubViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var club = new Club
+                {
+                    ClubName = model.ClubName,
+                    Location = model.Location,
+                    Description = model.Description,
+                    ContactEmail = model.ContactEmail
+                };
+                var clubModerator = new ClubModerator
+                {
+                    UserID = currentUser.Id,
+                    User = currentUser
+                };
+                club.ClubModerator = clubModerator;
+                club.ClubModeratorID = clubModerator.ClubModeratorID;
+
+                _context.Clubs.Add(club);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Manage), new { id = club.ClubID });
+            }
+            return View(model);
+        }
         [Authorize]
         public async Task<IActionResult> Manage(int id)
         {
@@ -42,33 +76,59 @@ namespace RunBuddies.App.Controllers
                 return Forbid();
             }
 
-            return View(club);
+            var viewModel = new ClubManageViewModel
+            {
+                Club = club,
+                MemberRequests = await _context.ClubMembershipRequests
+                    .Where(r => r.ClubID == id && r.Status == MembershipRequestStatus.Pending)
+                    .Include(r => r.User)
+                    .ToListAsync()
+            };
+
+            return View(viewModel);
         }
 
         [Authorize]
         public async Task<IActionResult> Edit(int id)
         {
-            var club = await _context.Clubs.FindAsync(id);
+            var club = await _context.Clubs
+                .Include(c => c.ClubModerator)
+                .Include(c => c.ClubMembers)
+                    .ThenInclude(cm => cm.User)
+                .Include(c => c.Events)
+                .FirstOrDefaultAsync(c => c.ClubID == id);
+
             if (club == null)
             {
                 return NotFound();
             }
 
             var currentUser = await _userManager.GetUserAsync(User);
-            if (club.ClubModerator.UserID != currentUser.Id)
+            if (club.ClubModerator == null || club.ClubModerator.UserID != currentUser.Id)
             {
                 return Forbid();
             }
 
-            return View(club);
+            var memberRequests = await _context.ClubMembershipRequests
+                .Where(r => r.ClubID == id && r.Status == MembershipRequestStatus.Pending)
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var viewModel = new ClubManageViewModel
+            {
+                Club = club,
+                MemberRequests = memberRequests
+            };
+
+            return View("Manage", viewModel);
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Club club)
+        public async Task<IActionResult> Edit(int id, ClubViewModel model)
         {
-            if (id != club.ClubID)
+            if (id != model.ClubID)
             {
                 return NotFound();
             }
@@ -77,12 +137,31 @@ namespace RunBuddies.App.Controllers
             {
                 try
                 {
-                    _context.Update(club);
+                    var club = await _context.Clubs
+                        .Include(c => c.ClubModerator)
+                        .FirstOrDefaultAsync(c => c.ClubID == id);
+
+                    if (club == null)
+                    {
+                        return NotFound();
+                    }
+
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    if (club.ClubModerator == null || club.ClubModerator.UserID != currentUser.Id)
+                    {
+                        return Forbid();
+                    }
+
+                    club.ClubName = model.ClubName;
+                    club.Location = model.Location;
+                    club.Description = model.Description;
+                    club.ContactEmail = model.ContactEmail;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClubExists(club.ClubID))
+                    if (!ClubExists(model.ClubID))
                     {
                         return NotFound();
                     }
@@ -91,9 +170,78 @@ namespace RunBuddies.App.Controllers
                         throw;
                     }
                 }
+                return RedirectToAction(nameof(Manage), new { id = model.ClubID });
+            }
+            return View(model);
+        }
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptMember(int requestId)
+        {
+            var request = await _context.ClubMembershipRequests.FindAsync(requestId);
+            if (request == null)
+            {
+                return NotFound();
+            }
+            request.Status = MembershipRequestStatus.Accepted;
+            var clubMember = new ClubMember
+            {
+                UserID = request.UserID,
+                Clubs = new List<Club> { await _context.Clubs.FindAsync(request.ClubID) }
+            };
+            _context.ClubMembers.Add(clubMember);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Manage), new { id = request.ClubID });
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectMember(int requestId)
+        {
+            var request = await _context.ClubMembershipRequests.FindAsync(requestId);
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            request.Status = MembershipRequestStatus.Rejected;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage), new { id = request.ClubID });
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateClub(ClubViewModel model)
+        {
+            var club = await _context.Clubs.FindAsync(model.ClubID);
+            if (club == null)
+            {
+                return NotFound();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (club.ClubModerator == null || club.ClubModerator.UserID != currentUser.Id)
+            {
+                return Forbid();
+            }
+
+            if (ModelState.IsValid)
+            {
+                club.ClubName = model.ClubName;
+                club.Location = model.Location;
+                club.Description = model.Description;
+                club.ContactEmail = model.ContactEmail;
+
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Manage), new { id = club.ClubID });
             }
-            return View(club);
+
+            return RedirectToAction(nameof(Manage), new { id = model.ClubID });
         }
 
         [HttpPost]

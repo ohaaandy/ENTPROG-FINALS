@@ -1,35 +1,73 @@
-﻿@model Club
+﻿@model ClubManageViewModel
 
-<h2>Manage Club: @Model.ClubName</h2>
+<h2>Manage Club: @Model.Club.ClubName</h2>
 
 <div class="row">
     <div class="col-md-6">
         <h3>Club Information</h3>
         <dl class="row">
             <dt class="col-sm-4">Name:</dt>
-            <dd class="col-sm-8">@Model.ClubName</dd>
+            <dd class="col-sm-8">@Model.Club.ClubName</dd>
 
             <dt class="col-sm-4">Location:</dt>
-            <dd class="col-sm-8">@Model.Location</dd>
+            <dd class="col-sm-8">@Model.Club.Location</dd>
 
             <dt class="col-sm-4">Description:</dt>
-            <dd class="col-sm-8">@Model.Description</dd>
+            <dd class="col-sm-8">@Model.Club.Description</dd>
 
             <dt class="col-sm-4">Contact Email:</dt>
-            <dd class="col-sm-8">@Model.ContactEmail</dd>
+            <dd class="col-sm-8">@Model.Club.ContactEmail</dd>
         </dl>
-        <a asp-action="Edit" asp-route-id="@Model.ClubID" class="btn btn-primary">Edit Club Info</a>
+        <form asp-action="UpdateClub" method="post">
+            <input type="hidden" name="ClubID" value="@Model.Club.ClubID" />
+            <div class="form-group">
+                <label for="ClubName">Name:</label>
+                <input type="text" class="form-control" id="ClubName" name="ClubName" value="@Model.Club.ClubName" />
+            </div>
+            <div class="form-group">
+                <label for="Location">Location:</label>
+                <input type="text" class="form-control" id="Location" name="Location" value="@Model.Club.Location" />
+            </div>
+            <div class="form-group">
+                <label for="Description">Description:</label>
+                <textarea class="form-control" id="Description" name="Description">@Model.Club.Description</textarea>
+            </div>
+            <div class="form-group">
+                <label for="ContactEmail">Contact Email:</label>
+                <input type="email" class="form-control" id="ContactEmail" name="ContactEmail" value="@Model.Club.ContactEmail" />
+            </div>
+            <button type="submit" class="btn btn-primary">Update Club Info</button>
+        </form>
     </div>
 
     <div class="col-md-6">
-        <h3>Club Members</h3>
-        @if (Model.ClubMembers != null && Model.ClubMembers.Any())
+        <h3>Membership Requests</h3>
+        @if (Model.MemberRequests != null && Model.MemberRequests.Any())
         {
             <ul class="list-group">
-                @foreach (var member in Model.ClubMembers)
+                @foreach (var request in Model.MemberRequests)
                 {
                     <li class="list-group-item">
-                        @member.User.FirstName @member.User.LastName
+                        @request.User.UserName
+                        <button class="btn btn-sm btn-success float-right accept-request" data-request-id="@request.ID">Accept</button>
+                        <button class="btn btn-sm btn-danger float-right mr-2 reject-request" data-request-id="@request.ID">Reject</button>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No pending membership requests.</p>
+        }
+
+        <h3 class="mt-4">Club Members</h3>
+        @if (Model.Club.ClubMembers != null && Model.Club.ClubMembers.Any())
+        {
+            <ul class="list-group">
+                @foreach (var member in Model.Club.ClubMembers)
+                {
+                    <li class="list-group-item">
+                        @member.User.UserName
                         <button class="btn btn-sm btn-danger float-right remove-member" data-member-id="@member.ClubMemberID">Remove</button>
                     </li>
                 }
@@ -45,7 +83,7 @@
 <div class="row mt-4">
     <div class="col-md-12">
         <h3>Club Events</h3>
-        @if (Model.Events != null && Model.Events.Any())
+        @if (Model.Club.Events != null && Model.Club.Events.Any())
         {
             <table class="table">
                 <thead>
@@ -57,7 +95,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var evt in Model.Events)
+                    @foreach (var evt in Model.Club.Events)
                     {
                         <tr>
                             <td>@evt.EventName</td>
@@ -76,18 +114,43 @@
         {
             <p>No events scheduled.</p>
         }
-        <a asp-action="CreateEvent" asp-route-clubId="@Model.ClubID" class="btn btn-success">Create New Event</a>
+        <a asp-action="CreateEvent" asp-route-clubId="@Model.Club.ClubID" class="btn btn-success">Create New Event</a>
     </div>
 </div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
+            $('.accept-request').click(function () {
+                var requestId = $(this).data('request-id');
+                if (confirm('Are you sure you want to accept this membership request?')) {
+                    $.post('@Url.Action("AcceptMember")', { requestId: requestId }, function (result) {
+                        if (result.success) {
+                            location.reload();
+                        } else {
+                            alert('Failed to accept member: ' + result.message);
+                        }
+                    });
+                }
+            });
+
+            $('.reject-request').click(function () {
+                var requestId = $(this).data('request-id');
+                if (confirm('Are you sure you want to reject this membership request?')) {
+                    $.post('@Url.Action("RejectMember")', { requestId: requestId }, function (result) {
+                        if (result.success) {
+                            location.reload();
+                        } else {
+                            alert('Failed to reject member: ' + result.message);
+                        }
+                    });
+                }
+            });
+
             $('.remove-member').click(function () {
                 var memberId = $(this).data('member-id');
-                var clubId = @Model.ClubID;
                 if (confirm('Are you sure you want to remove this member?')) {
-                    $.post('@Url.Action("RemoveMember")', { clubId: clubId, memberId: memberId }, function (result) {
+                    $.post('@Url.Action("RemoveMember")', { memberId: memberId }, function (result) {
                         if (result.success) {
                             location.reload();
                         } else {
