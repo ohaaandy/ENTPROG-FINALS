@@ -15,13 +15,23 @@ namespace RunBuddies.App
 
             builder.Services.AddDbContext<AppDBContext>(opts =>
             {
-                opts.UseSqlServer(builder.Configuration.GetConnectionString("Yash"));
+                opts.UseSqlServer(builder.Configuration.GetConnectionString("Yash"))
+                    .EnableSensitiveDataLogging()
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
+
             });
 
             ////Add Service to use the AutoMapper
+            builder.Services.AddScoped<AppDBContext>();
+
 
             builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+                    _ => "The field is required.");
+            });
             ////Add Service for the Repository
 
             //Add Service for the Microsoft Identity
@@ -64,10 +74,13 @@ namespace RunBuddies.App
             }
 
             // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

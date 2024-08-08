@@ -1,0 +1,49 @@
+﻿@model List<EventViewModel>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info" role="alert">
+        @TempData["InfoMessage"]
+    </div>
+}
+<h2>My Events</h2>
+
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var evt in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@evt.EventName</h5>
+                        <p class="card-text">Date: @evt.DateTime.ToString("yyyy-MM-dd HH:mm")</p>
+                        <p class="card-text">Location: @evt.Location</p>
+                        <p class="card-text">Club: @evt.ClubName</p>
+                        <p class="card-text">@(evt.Description?.Length > 100 ? evt.Description.Substring(0, 97) + "..." : evt.Description)</p>
+                        @if (evt.IsOrganizer)
+                        {
+                            <a asp-action="ManageEvent" asp-route-id="@evt.EventID" class="btn btn-primary">Manage</a>
+                        }
+                        else if (evt.IsParticipant)
+                        {
+                            <a asp-action="EventDetails" asp-route-id="@evt.EventID" class="btn btn-info">View</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>You are not participating in any events yet.</p>
+    <a asp-action="Index" class="btn btn-primary">Find Events</a>
+}

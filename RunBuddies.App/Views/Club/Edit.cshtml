@@ -1,42 +1,65 @@
-﻿@model ClubViewModel
-
-<h2>Edit Club</h2>
-
-<form asp-action="Edit">
+﻿@model Club
+<h2>Edit Club Information</h2>
+<form id="editClubForm" asp-action="Edit" asp-route-id="@Model.ClubID" method="post">
     <input type="hidden" asp-for="ClubID" />
     <div class="form-group">
-        <label asp-for="ClubName" class="control-label"></label>
+        <label asp-for="ClubName">Club Name</label>
         <input asp-for="ClubName" class="form-control" />
         <span asp-validation-for="ClubName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Location" class="control-label"></label>
-        <select asp-for="Location" class="form-control">
-            <option value="" disabled selected>Select City</option>
-            <option value="Manila">Manila</option>
-            <option value="Quezon City">Quezon City</option>
-            <!-- Add other cities as in your Create view -->
-        </select>
+        <label asp-for="Location">Location</label>
+        <input asp-for="Location" class="form-control" />
         <span asp-validation-for="Location" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Description" class="control-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
+        <label asp-for="Description">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="ContactEmail" class="control-label"></label>
+        <label asp-for="ContactEmail">Contact Email</label>
         <input asp-for="ContactEmail" class="form-control" />
         <span asp-validation-for="ContactEmail" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <input type="submit" value="Save" class="btn btn-primary" />
-        <a asp-action="Manage" asp-route-id="@Model.ClubID" class="btn btn-secondary">Cancel</a>
+        <label asp-for="CommunicationGroupLink">Communication Group Link (Optional)</label>
+        <input asp-for="CommunicationGroupLink" class="form-control" />
+        <span asp-validation-for="CommunicationGroupLink" class="text-danger"></span>
     </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Manage" asp-route-id="@Model.ClubID" class="btn btn-secondary">Cancel</a>
 </form>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $(document).ready(function () {
+            $('#editClubForm').on('submit', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: $(this).attr('method'),
+                    data: $(this).serialize(),
+                    success: function (result) {
+                        if (result.success) {
+                            window.location.href = '@Url.Action("Manage", new { id = Model.ClubID })';
+                        } else {
+                            var errorMessage = result.message || 'Failed to update club information.';
+                            if (result.errors) {
+                                errorMessage += ' Errors: ' + result.errors.join(', ');
+                            }
+                            alert(errorMessage + ' Please try again.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(xhr.responseText);
+                        alert('An error occurred while updating club information. Please try again. Error: ' + error);
+                    }
+                });
+            });
+        });
+    </script>
 }

@@ -21,5 +21,11 @@ namespace RunBuddies.DataModel
         public List<Event> Events { get; set; }
         public string? CommunicationGroupLink { get; set; }
 
+         public Club()
+    {
+        ClubMembers = new List<ClubMember>();
+        Events = new List<Event>();
+    }
+
     }
 }

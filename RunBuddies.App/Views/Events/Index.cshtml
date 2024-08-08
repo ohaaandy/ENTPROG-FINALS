@@ -1,32 +1,33 @@
-﻿@model IEnumerable<RunBuddies.ViewModels.EventViewModel>
-@{
-    ViewData["Title"] = "Events";
-}
+﻿@model List<Event>
 
-<h1>LOREM IPSUM</h1>
-<p>lorem ipsum dolor sit amet, consectetur adipiscing elit, pellentesque quis aliquet massa. mauris finibus nunc sit amet lacinia varius. nullam accumsan vehicula lectus et congue.</p>
+<div class="container">
+    <h2 class="text-center mb-4">Events</h2>
+    <div class="row justify-content-center">
+        @foreach (var evt in Model)
+        {
+            <div class="col-md-8 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>@evt.EventName</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Type:</strong> @evt.EventType</p>
+                        <p><strong>Date and Time:</strong> @evt.DateTime.ToString("yyyy-MM-dd HH:mm")</p>
+                        <p><strong>Location:</strong> @evt.Location</p>
+                        <p><strong>Description:</strong> @evt.Description</p>
+                        <p><strong>Organizer:</strong> @evt.User.UserName</p>
+                        <p><strong>Club:</strong> @evt.Club.ClubName</p>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New Event</a>
-</p>
-
-<div class="event-grid">
-   @*  @foreach (var item in Model.Take(6))
-    {
-        <div class="event-item">
-            <div class="image-placeholder">
-                <img src="@item.ImageUrl" alt="@item.EventName" /> 
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <form asp-action="JoinEvent" asp-controller="Event" method="post">
+                                <input type="hidden" name="eventId" value="@evt.EventID" />
+                                <button type="submit" class="btn btn-primary">Join Event</button>
+                            </form>
+                        }
+                    </div>
+                </div>
             </div>
-            <p>@item.EventName</p>
-        </div>
-    } *@ 
-    @for (int i = 1; i <= 6; i++)
-    {
-        <div class="event-item">
-            <div class="image-placeholder">
-                <img src="/path/to/placeholder-image.jpg" alt="Event Image Placeholder" />
-            </div>
-            <p>event #@i</p>
-        </div>
-    }
+        }
+    </div>
 </div>

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RunBuddies.App.Models;
 using RunBuddies.DataModel;
-using RunBuddies.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,102 +12,129 @@ namespace RunBuddies.Controllers
     public class EventsController : Controller
     {
         private readonly AppDBContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public EventsController(AppDBContext context)
+        public EventsController(AppDBContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
         {
             var events = await _context.Events
-                .Select(e => new EventViewModel
-                {
-                    EventID = e.EventID,
-                    ClubID = e.ClubID,
-                    EventName = e.EventName,
-                    EventType = e.EventType,
-                    DateTime = e.DateTime,
-                    Location = e.Location,
-                    Description = e.Description,
-                    OrganizerName = e.User.UserName // Assuming User has a UserName property
-                                                    // HasUserJoined can be set here if needed
-                })
+                .Include(e => e.Club)
+                .Include(e => e.User)
+                .OrderBy(e => e.DateTime)
                 .ToListAsync();
+
             return View(events);
         }
 
-        public async Task<IActionResult> Details(int? id)
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var eventViewModel = await _context.Events
+        //        .Where(e => e.EventID == id)
+        //        .Select(e => new EventViewModel
+        //        {
+        //            EventID = e.EventID,
+        //            ClubID = e.ClubID,
+        //            EventName = e.EventName,
+        //            EventType = e.EventType,
+        //            DateTime = e.DateTime,
+        //            Location = e.Location,
+        //            Description = e.Description,
+        //            OrganizerName = e.User.UserName,
+        //            // HasUserJoined can be set here if needed
+        //        })
+        //        .FirstOrDefaultAsync();
+
+        //    if (eventViewModel == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(eventViewModel);
+        //}
+
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(EventViewModel eventViewModel)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var newEvent = new Event
+        //        {
+        //            EventName = eventViewModel.EventName,
+        //            DateTime = eventViewModel.DateTime,
+        //            Location = eventViewModel.Location,
+        //            Description = eventViewModel.Description,
+        //            // Set other properties as needed
+        //        };
+
+        //        _context.Add(newEvent);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(eventViewModel);
+        //}
+
+        [Authorize]
+        public async Task<IActionResult> MyEvents()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-            var eventViewModel = await _context.Events
-                .Where(e => e.EventID == id)
+            var currentUser = await _userManager.GetUserAsync(User);
+            var userEvents = await _context.Events
+                .Where(e => e.UserID == currentUser.Id || e.Participants.Any(p => p.Id == currentUser.Id))
+                .Include(e => e.Club)
                 .Select(e => new EventViewModel
                 {
                     EventID = e.EventID,
-                    ClubID = e.ClubID,
                     EventName = e.EventName,
-                    EventType = e.EventType,
                     DateTime = e.DateTime,
                     Location = e.Location,
                     Description = e.Description,
-                    OrganizerName = e.User.UserName,
-                    // HasUserJoined can be set here if needed
+                    ClubName = e.Club.ClubName,
+                    IsOrganizer = e.UserID == currentUser.Id,
+                    IsParticipant = e.Participants.Any(p => p.Id == currentUser.Id)
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
-            if (eventViewModel == null)
+            return View(userEvents);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> JoinEvent(int eventId)
+        {
+            var evt = await _context.Events.Include(e => e.Participants).FirstOrDefaultAsync(e => e.EventID == eventId);
+            if (evt == null)
             {
                 return NotFound();
             }
 
-            return View(eventViewModel);
-        }
+            var currentUser = await _userManager.GetUserAsync(User);
 
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(EventViewModel eventViewModel)
-        {
-            if (ModelState.IsValid)
+            if (!evt.Participants.Any(p => p.Id == currentUser.Id))
             {
-                var newEvent = new Event
-                {
-                    EventName = eventViewModel.EventName,
-                    DateTime = eventViewModel.DateTime,
-                    Location = eventViewModel.Location,
-                    Description = eventViewModel.Description,
-                    // Set other properties as needed
-                };
-
-                _context.Add(newEvent);
+                evt.Participants.Add(currentUser);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                TempData["SuccessMessage"] = "You have successfully joined the event!";
             }
-            return View(eventViewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> JoinEvent(int id)
-        {
-            var @event = await _context.Events.FindAsync(id);
-            if (@event == null)
+            else
             {
-                return NotFound();
+                TempData["InfoMessage"] = "You are already a participant in this event.";
             }
 
-            // Implement join event logic here
-            // For example, you might add the current user to the event's participants
-
-            return RedirectToAction(nameof(Details), new { id = @event.EventID });
+            return RedirectToAction(nameof(Index));
         }
     }
 }

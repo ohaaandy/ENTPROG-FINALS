@@ -6,13 +6,13 @@ namespace RunBuddies.App.Models
     public class ClubViewModel
     {
         public int ClubID { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Club Name is required")]
         public string ClubName { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Location is required")]
         public string Location { get; set; }
         public string Description { get; set; }
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Contact Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address")]
         public string ContactEmail { get; set; }
         public bool IsModerator { get; set; }
         public bool IsMember { get; set; }

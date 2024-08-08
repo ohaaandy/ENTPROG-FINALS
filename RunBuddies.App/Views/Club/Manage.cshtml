@@ -3,6 +3,24 @@
 <div class="container">
     <h2 class="text-center mb-4">Manage Club: @Model.Club.ClubName</h2>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mb-4">
@@ -17,7 +35,9 @@
                     {
                         <p><strong>Communication Group:</strong> <a href="@Model.Club.CommunicationGroupLink" target="_blank" class="btn btn-sm btn-success">Join Group</a></p>
                     }
-                    <button id="editClubInfoBtn" class="btn btn-primary">Edit Club Info</button>
+                    @* <a asp-action="Edit" asp-route-id="@Model.Club.ClubID" class="btn btn-primary">Edit Club Info</a> *@
+
+
                 </div>
             </div>
 
@@ -122,7 +142,7 @@
                     {
                         <p>No events scheduled.</p>
                     }
-                    <a asp-action="CreateEvent" asp-route-clubId="@Model.Club.ClubID" class="btn btn-success">Create New Event</a>
+                    <a asp-controller="Club" asp-action="CreateEvent" asp-route-clubId="@Model.Club.ClubID" class="btn btn-primary">Create Event</a>
                 </div>
             </div>
         </div>

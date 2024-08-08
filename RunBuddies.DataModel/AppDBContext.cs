@@ -168,6 +168,11 @@ namespace RunBuddies.DataModel
                 .WithMany(u => u.ClubMembers)
                 .HasForeignKey(cm => cm.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Event>()
+                .HasMany(e => e.Participants)
+                .WithMany()
+                .UsingEntity(j => j.ToTable("EventParticipants"));
         }
 
         //public DbSet<User> AspNetUsers { get; set; }
@@ -183,6 +188,7 @@ namespace RunBuddies.DataModel
         public DbSet<ClubMembership> ClubMemberships { get; set; }
         public DbSet<ClubMembershipRequest> ClubMembershipRequests { get; set; }
 
+        public DbSet<EventParticipant> EventParticipants { get; set; }
 
     }
 }

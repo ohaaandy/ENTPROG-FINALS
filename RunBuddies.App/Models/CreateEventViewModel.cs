@@ -1,13 +1,9 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace RunBuddies.App.Models // Make sure this namespace matches your project structure
+namespace RunBuddies.App.Models
 {
-    public class EventViewModel
+    public class CreateEventViewModel
     {
-        public int EventID { get; set; }
-
-        [Required(ErrorMessage = "Club ID is required")]
         public int ClubID { get; set; }
 
         [Required(ErrorMessage = "Event Name is required")]
@@ -23,8 +19,5 @@ namespace RunBuddies.App.Models // Make sure this namespace matches your project
         public string Location { get; set; }
 
         public string Description { get; set; }
-        public string ClubName { get; set; }
-        public bool IsOrganizer { get; set; }
-        public bool IsParticipant { get; set; }
     }
 }

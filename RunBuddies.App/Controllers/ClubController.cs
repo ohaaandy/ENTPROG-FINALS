@@ -4,65 +4,101 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RunBuddies.App.Models;
 using RunBuddies.DataModel;
-using RunBuddies.ViewModels;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace RunBuddies.App.Controllers
 {
-
+    [Authorize]
     public class ClubController : Controller
     {
         private readonly AppDBContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly ILogger<ClubController> _logger;
 
-        public ClubController(AppDBContext context, UserManager<User> userManager)
+
+        public ClubController(AppDBContext context, UserManager<User> userManager, ILogger<ClubController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> CreateEvent(int clubId)
         {
-            return View(new CreateClubViewModel());
-        }
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge(); // This will redirect to login if the user is not authenticated
+            }
 
+            var club = await _context.Clubs
+                .Include(c => c.ClubModerator)
+                .FirstOrDefaultAsync(c => c.ClubID == clubId);
+
+            if (club == null)
+            {
+                return NotFound($"Club with ID {clubId} not found.");
+            }
+
+            if (club.ClubModerator == null)
+            {
+                return BadRequest($"Club with ID {clubId} does not have a moderator.");
+            }
+
+            if (club.ClubModerator.UserID != currentUser.Id)
+            {
+                return Forbid(); // This should trigger the AccessDenied page
+            }
+
+            var model = new CreateEventViewModel { ClubID = clubId };
+            return View(model);
+        }
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateClubViewModel model)
+        public async Task<IActionResult> CreateEvent(CreateEventViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var currentUser = await _userManager.GetUserAsync(User);
-                var club = new Club
-                {
-                    ClubName = model.ClubName,
-                    Location = model.Location,
-                    Description = model.Description,
-                    ContactEmail = model.ContactEmail,
-                    CommunicationGroupLink = string.IsNullOrWhiteSpace(model.CommunicationGroupLink) ? null : model.CommunicationGroupLink
-                };
-                var clubModerator = new ClubModerator
-                {
-                    UserID = currentUser.Id,
-                    User = currentUser
-                };
-                club.ClubModerator = clubModerator;
-                club.ClubModeratorID = clubModerator.ClubModeratorID;
-
-                // Add the creator as a member
-                var clubMember = new ClubMember
-                {
-                    UserID = currentUser.Id,
-                    User = currentUser
-                };
-                club.ClubMembers = new List<ClubMember> { clubMember };
-
-                _context.Clubs.Add(club);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Manage), new { id = club.ClubID });
+                return View(model);
             }
-            return View(model);
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
+            var club = await _context.Clubs
+                .Include(c => c.ClubModerator)
+                .FirstOrDefaultAsync(c => c.ClubID == model.ClubID);
+
+            if (club == null)
+            {
+                return NotFound($"Club with ID {model.ClubID} not found.");
+            }
+
+            if (club.ClubModerator == null || club.ClubModerator.UserID != currentUser.Id)
+            {
+                return Forbid();
+            }
+
+            var newEvent = new Event
+            {
+                ClubID = model.ClubID,
+                UserID = currentUser.Id,
+                EventName = model.EventName,
+                EventType = model.EventType,
+                DateTime = model.DateTime,
+                Location = model.Location,
+                Description = model.Description
+            };
+
+            _context.Events.Add(newEvent);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage), new { id = model.ClubID });
         }
 
         [Authorize]
@@ -132,9 +168,6 @@ namespace RunBuddies.App.Controllers
         {
             var club = await _context.Clubs
                 .Include(c => c.ClubModerator)
-                .Include(c => c.ClubMembers)
-                    .ThenInclude(cm => cm.User)
-                .Include(c => c.Events)
                 .FirstOrDefaultAsync(c => c.ClubID == id);
 
             if (club == null)
@@ -148,72 +181,78 @@ namespace RunBuddies.App.Controllers
                 return Forbid();
             }
 
-            var memberRequests = await _context.ClubMembershipRequests
-                .Where(r => r.ClubID == id && r.Status == MembershipRequestStatus.Pending)
-                .Include(r => r.User)
-                .ToListAsync();
-
-            var viewModel = new ClubManageViewModel
-            {
-                Club = club,
-                MemberRequests = memberRequests
-            };
-
-            return View("Manage", viewModel);
+            return View(club);
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ClubViewModel model)
+        public async Task<IActionResult> Edit(int id, [Bind("ClubID,ClubName,Location,Description,ContactEmail,CommunicationGroupLink")] Club club)
         {
-            if (id != model.ClubID)
+            if (id != club.ClubID)
             {
-                return NotFound();
+                return Json(new { success = false, message = "ID mismatch" });
+            }
+
+            // Fetch the existing club with all its related data
+            var existingClub = await _context.Clubs
+                .Include(c => c.ClubModerator)
+                .Include(c => c.ClubMembers)
+                .Include(c => c.Events)
+                .FirstOrDefaultAsync(c => c.ClubID == id);
+
+            if (existingClub == null)
+            {
+                return Json(new { success = false, message = "Club not found" });
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (existingClub.ClubModerator == null || existingClub.ClubModerator.UserID != currentUser.Id)
+            {
+                return Json(new { success = false, message = "Unauthorized access" });
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var club = await _context.Clubs
-                        .Include(c => c.ClubModerator)
-                        .FirstOrDefaultAsync(c => c.ClubID == id);
+                    // Update only the editable fields
+                    existingClub.ClubName = club.ClubName;
+                    existingClub.Location = club.Location;
+                    existingClub.Description = club.Description;
+                    existingClub.ContactEmail = club.ContactEmail;
+                    existingClub.CommunicationGroupLink = club.CommunicationGroupLink;
 
-                    if (club == null)
-                    {
-                        return NotFound();
-                    }
+                    // Ensure ClubModeratorID is preserved
+                    existingClub.ClubModeratorID = existingClub.ClubModerator.ClubModeratorID;
 
-                    var currentUser = await _userManager.GetUserAsync(User);
-                    if (club.ClubModerator == null || club.ClubModerator.UserID != currentUser.Id)
-                    {
-                        return Forbid();
-                    }
-
-                    club.ClubName = model.ClubName;
-                    club.Location = model.Location;
-                    club.Description = model.Description;
-                    club.ContactEmail = model.ContactEmail;
-                    club.CommunicationGroupLink = string.IsNullOrWhiteSpace(model.CommunicationGroupLink) ? null : model.CommunicationGroupLink;
-
+                    _context.Entry(existingClub).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
+
+                    return Json(new { success = true });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClubExists(model.ClubID))
+                    if (!ClubExists(club.ClubID))
                     {
-                        return NotFound();
+                        return Json(new { success = false, message = "Club no longer exists" });
                     }
                     else
                     {
-                        throw;
+                        return Json(new { success = false, message = "Concurrency error" });
                     }
                 }
-                return RedirectToAction(nameof(Manage), new { id = model.ClubID });
             }
-            return View(model);
+
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+            return Json(new { success = false, message = "Invalid data", errors = errors });
         }
+        private bool ClubExists(int id)
+        {
+            return _context.Clubs.Any(e => e.ClubID == id);
+        }
+        
+
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -302,64 +341,92 @@ namespace RunBuddies.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateClub(Club club)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                var viewModel = new ClubManageViewModel
+                if (!ModelState.IsValid)
                 {
-                    Club = club,
-                    MemberRequests = await _context.ClubMembershipRequests
-                        .Where(r => r.ClubID == club.ClubID && r.Status == MembershipRequestStatus.Pending)
-                        .Include(r => r.User)
-                        .ToListAsync()
-                };
-                return View("Manage", viewModel);
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    _logger.LogWarning($"Invalid ModelState: {string.Join(", ", errors)}");
+                    return View("Manage", new ClubManageViewModel { Club = club, MemberRequests = await GetMemberRequests(club.ClubID) });
+                }
+
+                var existingClub = await _context.Clubs
+                    .Include(c => c.ClubModerator)
+                    .Include(c => c.ClubMembers)
+                    .Include(c => c.Events)
+                    .FirstOrDefaultAsync(c => c.ClubID == club.ClubID);
+
+                if (existingClub == null)
+                {
+                    _logger.LogWarning($"Club not found: {club.ClubID}");
+                    return NotFound();
+                }
+
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (existingClub.ClubModerator == null || existingClub.ClubModerator.UserID != currentUser.Id)
+                {
+                    _logger.LogWarning($"Unauthorized access attempt by user: {currentUser.Id}");
+                    return Forbid();
+                }
+
+                _logger.LogInformation($"Updating club: {existingClub.ClubID}");
+                _logger.LogInformation($"Old values: {JsonSerializer.Serialize(existingClub)}");
+                _logger.LogInformation($"New values: {JsonSerializer.Serialize(club)}");
+
+                // Update the existing club properties
+                existingClub.ClubName = club.ClubName;
+                existingClub.Location = club.Location;
+                existingClub.Description = club.Description;
+                existingClub.ContactEmail = club.ContactEmail;
+                existingClub.CommunicationGroupLink = club.CommunicationGroupLink;
+
+                _context.Entry(existingClub).State = EntityState.Modified;
+
+                var changes = await _context.SaveChangesAsync();
+                _logger.LogInformation($"Changes saved: {changes}");
+
+                // Verify that changes were saved
+                await _context.Entry(existingClub).ReloadAsync();
+
+                if (existingClub.ClubName == club.ClubName &&
+                    existingClub.Location == club.Location &&
+                    existingClub.Description == club.Description &&
+                    existingClub.ContactEmail == club.ContactEmail &&
+                    existingClub.CommunicationGroupLink == club.CommunicationGroupLink)
+                {
+                    _logger.LogInformation("Club information updated successfully.");
+                    TempData["SuccessMessage"] = "Club information updated successfully.";
+                }
+                else
+                {
+                    _logger.LogWarning("Club information may not have been fully updated.");
+                    TempData["ErrorMessage"] = "Club information may not have been fully updated. Please check and try again.";
+                }
+
+                return RedirectToAction(nameof(Manage), new { id = existingClub.ClubID });
             }
-
-            var existingClub = await _context.Clubs
-                .Include(c => c.ClubModerator)
-                .Include(c => c.ClubMembers)
-                .Include(c => c.Events)
-                .FirstOrDefaultAsync(c => c.ClubID == club.ClubID);
-
-            if (existingClub == null)
+            catch (DbUpdateException ex)
             {
-                return NotFound();
+                _logger.LogError(ex, "Error updating club");
+                TempData["ErrorMessage"] = "An error occurred while updating the club information. Please try again.";
+                return View("Manage", new ClubManageViewModel { Club = club, MemberRequests = await GetMemberRequests(club.ClubID) });
             }
-
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (existingClub.ClubModerator == null || existingClub.ClubModerator.UserID != currentUser.Id)
+            catch (Exception ex)
             {
-                return Forbid();
+                _logger.LogError(ex, "Unexpected error updating club");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again.";
+                return View("Manage", new ClubManageViewModel { Club = club, MemberRequests = await GetMemberRequests(club.ClubID) });
             }
-
-            existingClub.ClubName = club.ClubName;
-            existingClub.Location = club.Location;
-            existingClub.Description = club.Description;
-            existingClub.ContactEmail = club.ContactEmail;
-            existingClub.CommunicationGroupLink = club.CommunicationGroupLink;
-
-            await _context.SaveChangesAsync();
-
-            var updatedViewModel = new ClubManageViewModel
-            {
-                Club = existingClub,
-                MemberRequests = await _context.ClubMembershipRequests
-                    .Where(r => r.ClubID == existingClub.ClubID && r.Status == MembershipRequestStatus.Pending)
-                    .Include(r => r.User)
-                    .ToListAsync()
-            };
-
-            return View("Manage", updatedViewModel);
         }
 
-        private async Task<Club> GetClubEntityAsync(int clubId)
+        private async Task<List<ClubMembershipRequest>> GetMemberRequests(int clubId)
         {
-            return await _context.Clubs
-                .Include(c => c.ClubModerator)
-                .Include(c => c.ClubMembers)
-                .Include(c => c.Events)
-                .FirstOrDefaultAsync(c => c.ClubID == clubId);
+            return await _context.ClubMembershipRequests
+                .Where(r => r.ClubID == clubId && r.Status == MembershipRequestStatus.Pending)
+                .Include(r => r.User)
+                .ToListAsync();
         }
+
 
         [HttpPost]
         [Authorize]
@@ -399,12 +466,7 @@ namespace RunBuddies.App.Controllers
             return Json(new { success = true });
         }
 
-        [Authorize]
-        public IActionResult CreateEvent(int clubId)
-        {
-            var eventVM = new EventViewModel { ClubID = clubId };
-            return View(eventVM);
-        }
+        
         public async Task<IActionResult> Details(int id)
         {
             var club = await _context.Clubs
@@ -436,32 +498,6 @@ namespace RunBuddies.App.Controllers
             return View(viewModel);
         }
 
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateEvent(EventViewModel eventVM)
-        {
-            if (ModelState.IsValid)
-            {
-                var newEvent = new Event
-                {
-                    ClubID = eventVM.ClubID,
-                    EventName = eventVM.EventName,
-                    EventType = eventVM.EventType,
-                    DateTime = eventVM.DateTime,
-                    Location = eventVM.Location,
-                    Description = eventVM.Description,
-                    UserID = (await _userManager.GetUserAsync(User)).Id
-                };
-
-                _context.Events.Add(newEvent);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Manage), new { id = eventVM.ClubID });
-            }
-
-            return View(eventVM);
-        }
 
         [HttpPost]
         [Authorize]
@@ -479,9 +515,6 @@ namespace RunBuddies.App.Controllers
             return Json(new { success = true });
         }
 
-        private bool ClubExists(int id)
-        {
-            return _context.Clubs.Any(e => e.ClubID == id);
-        }
+       
     }
 }
