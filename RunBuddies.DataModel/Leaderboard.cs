@@ -9,13 +9,9 @@ namespace RunBuddies.DataModel
 {
     public class Leaderboard
     {
-        [Key]
         public int LeaderboardID { get; set; }
-
-        public int EventID { get; set; }    //FK
-        public Event Event { get; set; }    //Navigation
-
-        public int Ranking { get; set; }
-        public TimeOnly Time { get; set; }
+        public int EventID { get; set; }
+        public Event Event { get; set; }
+        public List<LeaderboardEntry> Entries { get; set; }
     }
 }

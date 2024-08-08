@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RunBuddies.App.Models;
 using RunBuddies.DataModel;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace RunBuddies.Controllers
@@ -22,44 +23,53 @@ namespace RunBuddies.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var events = await _context.Events
-                .Include(e => e.Club)
-                .Include(e => e.User)
-                .OrderBy(e => e.DateTime)
-                .ToListAsync();
-
+            var events = await _context.Events.ToListAsync();
             return View(events);
         }
 
-        //public async Task<IActionResult> Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var eventViewModel = await _context.Events
-        //        .Where(e => e.EventID == id)
-        //        .Select(e => new EventViewModel
-        //        {
-        //            EventID = e.EventID,
-        //            ClubID = e.ClubID,
-        //            EventName = e.EventName,
-        //            EventType = e.EventType,
-        //            DateTime = e.DateTime,
-        //            Location = e.Location,
-        //            Description = e.Description,
-        //            OrganizerName = e.User.UserName,
-        //            // HasUserJoined can be set here if needed
-        //        })
-        //        .FirstOrDefaultAsync();
+        public async Task<IActionResult> Details(int id)
+        {
+            var @event = await _context.Events
+                .Include(e => e.Club)
+                .Include(e => e.EventParticipants)
+                .FirstOrDefaultAsync(e => e.EventID == id);
 
-        //    if (eventViewModel == null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (@event == null)
+            {
+                return NotFound();
+            }
 
-        //    return View(eventViewModel);
-        //}
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var viewModel = new EventDetailsViewModel
+            {
+                Event = @event,
+                CurrentUserId = currentUserId
+            };
+
+            return View(viewModel);
+        }
+
+        public async Task<IActionResult> EventDetails(int id)
+        {
+            var @event = await _context.Events
+                .Include(e => e.User)
+                .Include(e => e.EventParticipants)
+                    .ThenInclude(ep => ep.User)
+                .Include(e => e.Leaderboard)
+                    .ThenInclude(l => l.Entries)
+                        .ThenInclude(e => e.User)
+                .FirstOrDefaultAsync(e => e.EventID == id);
+
+            if (@event == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.CurrentUserId = _userManager.GetUserId(User);
+
+            return View(@event);
+        }
 
         //public IActionResult Create()
         //{
@@ -115,35 +125,176 @@ namespace RunBuddies.Controllers
         [Authorize]
         public async Task<IActionResult> JoinEvent(int eventId)
         {
-            var evt = await _context.Events.FindAsync(eventId);
-            if (evt == null)
+            var currentUser = await _userManager.GetUserAsync(User);
+            var eventToJoin = await _context.Events.FindAsync(eventId);
+
+            if (eventToJoin == null)
+            {
+                return NotFound();
+            }
+
+            var alreadyJoined = await _context.EventParticipants
+                .AnyAsync(ep => ep.EventID == eventId && ep.UserID == currentUser.Id);
+
+            if (alreadyJoined)
+            {
+                TempData["Message"] = "You have already joined this event.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var eventParticipant = new EventParticipant
+            {
+                EventID = eventId,
+                UserID = currentUser.Id
+            };
+
+            _context.EventParticipants.Add(eventParticipant);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"You have successfully joined the event: {eventToJoin.EventName}!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize]
+        public async Task<IActionResult> ManageEvent(int id)
+        {
+            var @event = await _context.Events
+                .Include(e => e.Club)
+                .Include(e => e.EventParticipants)
+                    .ThenInclude(ep => ep.User)
+                .FirstOrDefaultAsync(e => e.EventID == id);
+
+            if (@event == null)
             {
                 return NotFound();
             }
 
             var currentUser = await _userManager.GetUserAsync(User);
-
-            var existingParticipant = await _context.EventParticipants
-                .FirstOrDefaultAsync(ep => ep.EventID == eventId && ep.UserID == currentUser.Id);
-
-            if (existingParticipant == null)
+            if (@event.UserID != currentUser.Id)
             {
-                var eventParticipant = new EventParticipant
-                {
-                    EventID = eventId,
-                    UserID = currentUser.Id
-                };
+                return Forbid();
+            }
 
-                _context.EventParticipants.Add(eventParticipant);
+            return View(@event);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateEvent(Event model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "There was an error updating the event. Please check the form and try again.";
+                return RedirectToAction(nameof(ManageEvent), new { id = model.EventID });
+            }
+
+            var eventToUpdate = await _context.Events
+                .Include(e => e.EventParticipants)
+                .Include(e => e.Leaderboard)
+                .FirstOrDefaultAsync(e => e.EventID == model.EventID);
+
+            if (eventToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (eventToUpdate.UserID != currentUser.Id)
+            {
+                return Forbid();
+            }
+
+            // Update the properties
+            eventToUpdate.EventName = model.EventName;
+            eventToUpdate.EventType = model.EventType;
+            eventToUpdate.DateTime = model.DateTime;
+            eventToUpdate.Location = model.Location;
+            eventToUpdate.Description = model.Description;
+
+            try
+            {
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "You have successfully joined the event!";
+                TempData["SuccessMessage"] = "Event updated successfully!";
             }
-            else
+            catch (DbUpdateConcurrencyException)
             {
-                TempData["InfoMessage"] = "You are already a participant in this event.";
+                if (!EventExists(model.EventID))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(ManageEvent), new { id = model.EventID });
+        }
+
+        private bool EventExists(int id)
+        {
+            return _context.Events.Any(e => e.EventID == id);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> ManageLeaderboard(int eventId)
+        {
+            var @event = await _context.Events
+                .Include(e => e.Leaderboard)
+                    .ThenInclude(l => l.Entries)
+                        .ThenInclude(e => e.User)
+                .FirstOrDefaultAsync(e => e.EventID == eventId);
+
+            if (@event == null)
+            {
+                return NotFound();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (@event.UserID != currentUser.Id)
+            {
+                return Forbid();
+            }
+
+            return View(@event);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddLeaderboardEntry(int eventId, string userId, int rank, TimeSpan time)
+        {
+            var @event = await _context.Events
+                .Include(e => e.Leaderboard)
+                .FirstOrDefaultAsync(e => e.EventID == eventId);
+
+            if (@event == null)
+            {
+                return NotFound();
+            }
+
+            if (@event.Leaderboard == null)
+            {
+                @event.Leaderboard = new Leaderboard { EventID = eventId, Entries = new List<LeaderboardEntry>() };
+            }
+            else if (@event.Leaderboard.Entries == null)
+            {
+                @event.Leaderboard.Entries = new List<LeaderboardEntry>();
+            }
+
+            var entry = new LeaderboardEntry
+            {
+                LeaderboardID = @event.Leaderboard.LeaderboardID,
+                UserID = userId,
+                Rank = rank,
+                Time = time
+            };
+
+            @event.Leaderboard.Entries.Add(entry);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ManageEvent), new { id = eventId });
         }
     }
 }

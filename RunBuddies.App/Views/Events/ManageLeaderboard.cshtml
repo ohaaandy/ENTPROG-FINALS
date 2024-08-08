@@ -1,0 +1,53 @@
+﻿@model Event
+
+<h2>Manage Leaderboard for @Model.EventName</h2>
+
+<form asp-action="AddLeaderboardEntry" method="post">
+    <input type="hidden" name="eventId" value="@Model.EventID" />
+    <div class="form-group">
+        <label for="userId">User</label>
+        <select name="userId" class="form-control">
+            @foreach (var participant in Model.EventParticipants)
+            {
+                <option value="@participant.UserID">@participant.User.UserName</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="rank">Rank</label>
+        <input type="number" name="rank" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="time">Time (hh:mm:ss)</label>
+        <input type="time" name="time" class="form-control" step="1" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Add Entry</button>
+</form>
+
+@if (Model.Leaderboard != null && Model.Leaderboard.Entries.Any())
+{
+    <h3>Current Leaderboard</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in Model.Leaderboard.Entries.OrderBy(e => e.Rank))
+            {
+                <tr>
+                    <td>@entry.Rank</td>
+                    <td>@entry.User.UserName</td>
+                    <td>@entry.Time.ToString(@"hh\:mm\:ss")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No entries yet.</p>
+}

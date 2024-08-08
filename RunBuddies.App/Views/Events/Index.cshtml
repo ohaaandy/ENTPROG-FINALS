@@ -1,33 +1,35 @@
 ﻿@model List<Event>
 
-<div class="container">
-    <h2 class="text-center mb-4">Events</h2>
-    <div class="row justify-content-center">
-        @foreach (var evt in Model)
-        {
-            <div class="col-md-8 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>@evt.EventName</h3>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Type:</strong> @evt.EventType</p>
-                        <p><strong>Date and Time:</strong> @evt.DateTime.ToString("yyyy-MM-dd HH:mm")</p>
-                        <p><strong>Location:</strong> @evt.Location</p>
-                        <p><strong>Description:</strong> @evt.Description</p>
-                        <p><strong>Organizer:</strong> @evt.User.UserName</p>
-                        <p><strong>Club:</strong> @evt.Club.ClubName</p>
+<h2>Events</h2>
 
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <form asp-action="JoinEvent" asp-controller="Event" method="post">
-                                <input type="hidden" name="eventId" value="@evt.EventID" />
-                                <button type="submit" class="btn btn-primary">Join Event</button>
-                            </form>
-                        }
-                    </div>
-                </div>
-            </div>
-        }
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
     </div>
-</div>
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["Message"]
+    </div>
+}
+
+@foreach (var eventItem in Model)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@eventItem.EventName</h5>
+            <p class="card-text">Date: @eventItem.DateTime.ToString("yyyy-MM-dd HH:mm")</p>
+            <p class="card-text">Location: @eventItem.Location</p>
+            <p class="card-text">Description: @eventItem.Description</p>
+
+            <form asp-controller="Events" asp-action="JoinEvent" asp-route-eventId="@eventItem.EventID" method="post">
+                <button type="submit" class="btn btn-primary">Join Event</button>
+            </form>
+
+            <a asp-controller="Events" asp-action="Details" asp-route-id="@eventItem.EventID" class="btn btn-info">View Details</a>
+        </div>
+    </div>
+}

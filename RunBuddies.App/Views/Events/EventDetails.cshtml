@@ -1,0 +1,56 @@
+﻿@model Event
+
+<div class="container mt-4">
+    <h2>@Model.EventName</h2>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Type:</strong> @Model.EventType</p>
+            <p><strong>Date and Time:</strong> @Model.DateTime.ToString("f")</p>
+            <p><strong>Location:</strong> @Model.Location</p>
+            <p><strong>Description:</strong> @Model.Description</p>
+            <p><strong>Organizer:</strong> @Model.User.UserName</p>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (!Model.EventParticipants.Any(ep => ep.UserID == ViewBag.CurrentUserId))
+                {
+                    <form asp-action="JoinEvent" asp-route-eventId="@Model.EventID" method="post">
+                        <button type="submit" class="btn btn-primary">Join Event</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="text-success">You are participating in this event.</p>
+                }
+            }
+        </div>
+    </div>
+
+    @if (Model.Leaderboard != null && Model.Leaderboard.Entries != null && Model.Leaderboard.Entries.Any())
+    {
+        <h3 class="mt-4">Leaderboard</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>User</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.Leaderboard.Entries.OrderBy(e => e.Rank))
+                {
+                    <tr>
+                        <td>@entry.Rank</td>
+                        <td>@entry.User.UserName</td>
+                        <td>@entry.Time.ToString(@"hh\:mm\:ss")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No leaderboard entries yet.</p>
+    }
+</div>
