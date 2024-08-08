@@ -27,5 +27,7 @@ namespace RunBuddies.DataModel
         public List<ClubMember> ClubMembers { get; set; }           //many to one
         public List<Event> Events { get; set; }                     //many to one
         public List<BuddyPartner> BuddyPartners { get; set; }       //one to one
+
+        public ICollection<EventParticipant> EventParticipants { get; set; }
     }
 }

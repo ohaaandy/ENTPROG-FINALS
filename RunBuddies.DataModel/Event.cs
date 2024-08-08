@@ -27,6 +27,7 @@ namespace RunBuddies.DataModel
         public int LeaderboardID { get; set; }
         public Leaderboard Leaderboards { get; set; }     //one to one
 
+        public ICollection<EventParticipant> EventParticipants { get; set; }
         public ICollection<User> Participants { get; set; }
 
         public Event()

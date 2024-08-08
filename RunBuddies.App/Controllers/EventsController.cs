@@ -93,7 +93,7 @@ namespace RunBuddies.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var userEvents = await _context.Events
-                .Where(e => e.UserID == currentUser.Id || e.Participants.Any(p => p.Id == currentUser.Id))
+                .Where(e => e.UserID == currentUser.Id || e.EventParticipants.Any(ep => ep.UserID == currentUser.Id))
                 .Include(e => e.Club)
                 .Select(e => new EventViewModel
                 {
@@ -104,7 +104,7 @@ namespace RunBuddies.Controllers
                     Description = e.Description,
                     ClubName = e.Club.ClubName,
                     IsOrganizer = e.UserID == currentUser.Id,
-                    IsParticipant = e.Participants.Any(p => p.Id == currentUser.Id)
+                    IsParticipant = e.EventParticipants.Any(ep => ep.UserID == currentUser.Id)
                 })
                 .ToListAsync();
 
@@ -115,7 +115,7 @@ namespace RunBuddies.Controllers
         [Authorize]
         public async Task<IActionResult> JoinEvent(int eventId)
         {
-            var evt = await _context.Events.Include(e => e.Participants).FirstOrDefaultAsync(e => e.EventID == eventId);
+            var evt = await _context.Events.FindAsync(eventId);
             if (evt == null)
             {
                 return NotFound();
@@ -123,9 +123,18 @@ namespace RunBuddies.Controllers
 
             var currentUser = await _userManager.GetUserAsync(User);
 
-            if (!evt.Participants.Any(p => p.Id == currentUser.Id))
+            var existingParticipant = await _context.EventParticipants
+                .FirstOrDefaultAsync(ep => ep.EventID == eventId && ep.UserID == currentUser.Id);
+
+            if (existingParticipant == null)
             {
-                evt.Participants.Add(currentUser);
+                var eventParticipant = new EventParticipant
+                {
+                    EventID = eventId,
+                    UserID = currentUser.Id
+                };
+
+                _context.EventParticipants.Add(eventParticipant);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "You have successfully joined the event!";
             }
