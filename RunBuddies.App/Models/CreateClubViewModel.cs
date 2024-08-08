@@ -18,8 +18,9 @@ namespace RunBuddies.App.Models
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
         [Display(Name = "Contact Email")]
         public string ContactEmail { get; set; }
+        [Required]
 
-        [Display(Name = "Communication Group Link (Optional)")]
+        [Display(Name = "Communication Group Link")]
         [Url(ErrorMessage = "Please enter a valid URL")]
         public string? CommunicationGroupLink { get; set; } // Make this nullable
     }

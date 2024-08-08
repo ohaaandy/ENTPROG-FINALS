@@ -27,42 +27,59 @@
 
     <div class="tab-content mt-3" id="myTabContent">
         <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-            <form asp-action="UpdateEvent" method="post">
-                <input type="hidden" asp-for="EventID" />
-
-                <div class="mb-3">
-                    <label asp-for="EventName" class="form-label">Event Name</label>
-                    <input asp-for="EventName" class="form-control" />
-                    <span asp-validation-for="EventName" class="text-danger"></span>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Event Details</h4>
                 </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Event Name:</label>
+                        </div>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">@Model.EventName</p>
+                        </div>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="EventType" class="form-label">Event Type</label>
-                    <input asp-for="EventType" class="form-control" />
-                    <span asp-validation-for="EventType" class="text-danger"></span>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Event Type:</label>
+                        </div>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">@Model.EventType</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Date and Time:</label>
+                        </div>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">@Model.DateTime.ToString("f")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Location:</label>
+                        </div>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">@Model.Location</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Description:</label>
+                        </div>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">@Model.Description</p>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label asp-for="DateTime" class="form-label">Date and Time</label>
-                    <input asp-for="DateTime" class="form-control" type="datetime-local" />
-                    <span asp-validation-for="DateTime" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Location" class="form-label">Location</label>
-                    <input asp-for="Location" class="form-control" />
-                    <span asp-validation-for="Location" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label">Description</label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Update Event</button>
-            </form>
+            </div>
         </div>
+    
 
 
         <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">

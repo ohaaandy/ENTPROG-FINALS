@@ -19,7 +19,9 @@
                         <p class="card-text">
                             <strong>Location:</strong> @buddy.Location<br>
                             <strong>Preferred Schedule:</strong> @buddy.PreferredSchedule<br>
-                            <strong>Preferred Distance:</strong> @buddy.PreferredDistance km
+                            <strong>Preferred Distance:</strong> @buddy.PreferredDistance km <br>
+                            <strong>Email:</strong> @buddy.Email<br>
+                            <strong>Phone Number:</strong> @buddy.PhoneNumber
                         </p>
                         <div class="mb-3">
                             <strong>Contact:</strong><br>
@@ -27,27 +29,11 @@
                             <a href="tel:@buddy.PhoneNumber" class="card-link">Call</a>
                         </div>
                         <div class="mb-3">
-                            <strong>Recent Sessions:</strong>
-                            @if (buddy.RecentSessions.Any())
-                            {
-                                <ul class="list-unstyled">
-                                    @foreach (var session in buddy.RecentSessions)
-                                    {
-                                        <li>
-                                            @session.DateTime.ToString("MMM dd, yyyy") - @session.Location
-                                            <small class="text-muted">@session.Description</small>
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                            else
-                            {
-                                <p>No recent sessions</p>
-                            }
+                            
                         </div>
-                        <a href="@Url.Action("ScheduleSession", "Buddy", new { buddyId = buddy.UserId })" class="btn btn-primary">
+                        @* <a href="@Url.Action("ScheduleSession", "Buddy", new { buddyId = buddy.UserId })" class="btn btn-primary">
                             Schedule a Run
-                        </a>
+                        </a> *@
                         <form asp-action="RemoveBuddy" asp-route-buddyPartnerId="@buddy.BuddyPartnerId" method="post" style="display: inline;">
                             <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to remove this buddy?');">
                                 Remove Buddy

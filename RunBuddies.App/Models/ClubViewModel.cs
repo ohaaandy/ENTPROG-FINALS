@@ -16,7 +16,7 @@ namespace RunBuddies.App.Models
         public string ContactEmail { get; set; }
         public bool IsModerator { get; set; }
         public bool IsMember { get; set; }
-
+        [Required]
         [Url(ErrorMessage = "Please enter a valid URL")]
         [Display(Name = "Communication Group Link (Optional)")]
         public string CommunicationGroupLink { get; set; }
