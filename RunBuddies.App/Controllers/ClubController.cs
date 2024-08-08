@@ -23,6 +23,53 @@ namespace RunBuddies.App.Controllers
             _userManager = userManager;
             _logger = logger;
         }
+
+
+
+        public IActionResult Create()
+        {
+            return View(new CreateClubViewModel());
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateClubViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var club = new Club
+                {
+                    ClubName = model.ClubName,
+                    Location = model.Location,
+                    Description = model.Description,
+                    ContactEmail = model.ContactEmail,
+                    CommunicationGroupLink = string.IsNullOrWhiteSpace(model.CommunicationGroupLink) ? null : model.CommunicationGroupLink
+                };
+                var clubModerator = new ClubModerator
+                {
+                    UserID = currentUser.Id,
+                    User = currentUser
+                };
+                club.ClubModerator = clubModerator;
+                club.ClubModeratorID = clubModerator.ClubModeratorID;
+
+                // Add the creator as a member
+                var clubMember = new ClubMember
+                {
+                    UserID = currentUser.Id,
+                    User = currentUser
+                };
+                club.ClubMembers = new List<ClubMember> { clubMember };
+
+                _context.Clubs.Add(club);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Manage), new { id = club.ClubID });
+            }
+            return View(model);
+        }
+
         [Authorize]
         public async Task<IActionResult> CreateEvent(int clubId)
         {

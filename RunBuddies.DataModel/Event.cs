@@ -9,30 +9,23 @@ namespace RunBuddies.DataModel
 {
     public class Event
     {
-        [Key]
         public int EventID { get; set; }
-
-        public int ClubID { get; set; }     //FK
-        public Club Club { get; set; }      //Navigation
-
-        public string UserID { get; set; }     //FK
-        public User User { get; set; }      //Navigation
-
+        public int ClubID { get; set; }
+        public Club Club { get; set; }
+        public string UserID { get; set; }
+        public User User { get; set; }
         public string EventName { get; set; }
         public string EventType { get; set; }
         public DateTime DateTime { get; set; }
         public string Location { get; set; }
         public string Description { get; set; }
-
-        public int LeaderboardID { get; set; }
-        public Leaderboard Leaderboards { get; set; }     //one to one
-
+        public int? LeaderboardID { get; set; }
+        public Leaderboard Leaderboard { get; set; }
         public ICollection<EventParticipant> EventParticipants { get; set; }
-        public ICollection<User> Participants { get; set; }
 
         public Event()
         {
-            Participants = new List<User>();
+            EventParticipants = new List<EventParticipant>();
         }
     }
 }

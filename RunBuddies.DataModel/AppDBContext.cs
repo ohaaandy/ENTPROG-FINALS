@@ -17,49 +17,49 @@ namespace RunBuddies.DataModel
             this.userManager = userManager;
         }
 
-        public async Task SeedDataAsync()
-        {
-            if (!Users.Any())
-            {
-                var users = new List<User>
-            {
-                new User
-                {
-                    UserName = "john_doe",
-                    Email = "john@example.com",
-                    FirstName = "John",
-                    LastName = "Doe",
-                    Birthday = new DateOnly(1990, 1, 1),
-                    Gender = "Male",
-                    PhoneNumber = "1234567890",
-                    RunnerLevel = "Beginner",
-                    Schedule = new DateOnly(2023, 1, 2),
-                    Location = "Manila",
-                    Distance = 5,
-                    EmailConfirmed = true // Set this to true so the user can log in without email confirmation
-                },
-                new User
-                {
-                    UserName = "jane_smith",
-                    Email = "jane@example.com",
-                    FirstName = "Jane",
-                    LastName = "Smith",
-                    Birthday = new DateOnly(1992, 5, 15),
-                    Gender = "Female",
-                    PhoneNumber = "9876543210",
-                    RunnerLevel = "Intermediate",
-                    Schedule = new DateOnly(2023, 1, 4),
-                    Location = "Quezon City",
-                    Distance = 10,
-                    EmailConfirmed = true
-                },
-                // Add more users as needed
-            };
+        //public async Task SeedDataAsync()
+        //{
+        //    if (!Users.Any())
+        //    {
+        //        var users = new List<User>
+        //    {
+        //        new User
+        //        {
+        //            UserName = "john_doe",
+        //            Email = "john@example.com",
+        //            FirstName = "John",
+        //            LastName = "Doe",
+        //            Birthday = new DateOnly(1990, 1, 1),
+        //            Gender = "Male",
+        //            PhoneNumber = "1234567890",
+        //            RunnerLevel = "Beginner",
+        //            Schedule = new DateOnly(2023, 1, 2),
+        //            Location = "Manila",
+        //            Distance = 5,
+        //            EmailConfirmed = true // Set this to true so the user can log in without email confirmation
+        //        },
+        //        new User
+        //        {
+        //            UserName = "jane_smith",
+        //            Email = "jane@example.com",
+        //            FirstName = "Jane",
+        //            LastName = "Smith",
+        //            Birthday = new DateOnly(1992, 5, 15),
+        //            Gender = "Female",
+        //            PhoneNumber = "9876543210",
+        //            RunnerLevel = "Intermediate",
+        //            Schedule = new DateOnly(2023, 1, 4),
+        //            Location = "Quezon City",
+        //            Distance = 10,
+        //            EmailConfirmed = true
+        //        },
+        //        // Add more users as needed
+        //    };
 
-                Users.AddRange(users);
-                await SaveChangesAsync();
-            }
-        }
+        //        Users.AddRange(users);
+        //        await SaveChangesAsync();
+        //    }
+        //}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -107,24 +107,6 @@ namespace RunBuddies.DataModel
                 .HasForeignKey(p => p.ClubModeratorID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Event>()
-                .HasOne(p => p.User)
-                .WithMany(p => p.Events)
-                .HasForeignKey(p => p.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Event>()
-                .HasOne(p => p.Club)
-                .WithMany(p => p.Events)
-                .HasForeignKey(p => p.ClubID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Leaderboard>()
-                .HasOne(p => p.Events)
-                .WithOne(p => p.Leaderboards)
-                .HasForeignKey<Leaderboard>(p => p.EventID)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // BuddyPartner relationships
             modelBuilder.Entity<BuddyPartner>()
                 .HasOne(bp => bp.User1)
@@ -169,8 +151,26 @@ namespace RunBuddies.DataModel
                 .HasForeignKey(cm => cm.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Event>()
+           .HasOne(e => e.User)
+           .WithMany(u => u.Events)
+           .HasForeignKey(e => e.UserID)
+           .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Event>()
+                .HasOne(e => e.Club)
+                .WithMany(c => c.Events)
+                .HasForeignKey(e => e.ClubID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Event>()
+                .HasOne(e => e.Leaderboard)
+                .WithOne(l => l.Event)
+                .HasForeignKey<Leaderboard>(l => l.EventID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<EventParticipant>()
-           .HasKey(ep => new { ep.EventID, ep.UserID });
+                .HasKey(ep => new { ep.EventID, ep.UserID });
 
             modelBuilder.Entity<EventParticipant>()
                 .HasOne(ep => ep.Event)
@@ -181,6 +181,7 @@ namespace RunBuddies.DataModel
                 .HasOne(ep => ep.User)
                 .WithMany(u => u.EventParticipants)
                 .HasForeignKey(ep => ep.UserID);
+
         }
 
         //public DbSet<User> AspNetUsers { get; set; }

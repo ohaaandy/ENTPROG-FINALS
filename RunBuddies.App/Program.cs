@@ -70,7 +70,7 @@ namespace RunBuddies.App
                 var context = services.GetRequiredService<AppDBContext>();
                 var userManager = services.GetRequiredService<UserManager<User>>();
                 await context.Database.EnsureCreatedAsync();
-                await context.SeedDataAsync();
+                //await context.SeedDataAsync();
             }
 
             // Configure the HTTP request pipeline.

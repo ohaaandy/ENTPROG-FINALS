@@ -8,7 +8,6 @@ namespace RunBuddies.DataModel
 {
     public class EventParticipant
     {
-        public int EventParticipantID { get; set; }
         public int EventID { get; set; }
         public Event Event { get; set; }
         public string UserID { get; set; }

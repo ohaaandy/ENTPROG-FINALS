@@ -12,8 +12,8 @@ using RunBuddies.DataModel;
 namespace RunBuddies.DataModel.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240808083429_UpdateEventParticipantsRelationship")]
-    partial class UpdateEventParticipantsRelationship
+    [Migration("20240808121441_UpdateEventLeaderboardRelationship")]
+    partial class UpdateEventLeaderboardRelationship
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -400,7 +400,7 @@ namespace RunBuddies.DataModel.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LeaderboardID")
+                    b.Property<int?>("LeaderboardID")
                         .HasColumnType("int");
 
                     b.Property<string>("Location")
@@ -427,9 +427,6 @@ namespace RunBuddies.DataModel.Migrations
 
                     b.Property<string>("UserID")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("EventParticipantID")
-                        .HasColumnType("int");
 
                     b.HasKey("EventID", "UserID");
 
@@ -488,9 +485,6 @@ namespace RunBuddies.DataModel.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("EventID")
-                        .HasColumnType("int");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -546,8 +540,6 @@ namespace RunBuddies.DataModel.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EventID");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -799,20 +791,13 @@ namespace RunBuddies.DataModel.Migrations
 
             modelBuilder.Entity("RunBuddies.DataModel.Leaderboard", b =>
                 {
-                    b.HasOne("RunBuddies.DataModel.Event", "Events")
-                        .WithOne("Leaderboards")
+                    b.HasOne("RunBuddies.DataModel.Event", "Event")
+                        .WithOne("Leaderboard")
                         .HasForeignKey("RunBuddies.DataModel.Leaderboard", "EventID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Events");
-                });
-
-            modelBuilder.Entity("RunBuddies.DataModel.User", b =>
-                {
-                    b.HasOne("RunBuddies.DataModel.Event", null)
-                        .WithMany("Participants")
-                        .HasForeignKey("EventID");
+                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.BuddyPartner", b =>
@@ -834,10 +819,8 @@ namespace RunBuddies.DataModel.Migrations
                 {
                     b.Navigation("EventParticipants");
 
-                    b.Navigation("Leaderboards")
+                    b.Navigation("Leaderboard")
                         .IsRequired();
-
-                    b.Navigation("Participants");
                 });
 
             modelBuilder.Entity("RunBuddies.DataModel.User", b =>
