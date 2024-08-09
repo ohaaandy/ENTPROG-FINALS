@@ -1,89 +1,106 @@
 ﻿@model RegisterViewModel
 
-<h3>
+<div class="col-6 offset-3">
+    <div class="card text-dark border-dark mb-3" style="max-width: 100rem;">
+        <div class="card-body">
 
-    <i class="fa-solid fa-id-card-clip"></i>
-    Register New Account
+            <h3 class="card-title">
+                <i class="fa-solid fa-id-card-clip"></i>
+                Register New Account
+            </h3>
+            <hr />
 
-</h3>
-<hr />
+            <div style="text-align: left">
+                <form asp-controller="Profile" asp-action="Register" method="post">
 
-<div class="col-6">
-    <form asp-controller="Profile" asp-action="Register" method="post">
+                    @* <div asp-validation-summary="All" class="text-danger"></div>   //placed ALL validations under the txtbx instead*@
 
-        <div asp-validation-summary="All" class="text-danger"></div>
+                    <label asp-for="UserName">Username</label>
+                    <input asp-for="UserName" class="form-control" placeholder="Example: johndoe1995" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
 
-        <br />
+                    <br /><br />
 
-        <label asp-for="UserName">Username</label>
-        <input asp-for="UserName" class="form-control" placeholder="Example: johndoe1995" />
+                    <label asp-for="Email">Email Address</label>
+                    <input asp-for="Email" class="form-control" placeholder="Example: johndoe@gmail.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
 
-        <br /><br />
+                    <br /><br />
 
-        <label asp-for="Email">Email Address</label>
-        <input asp-for="Email" class="form-control" placeholder="Example: johndoe@gmail.com" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName">First Name</label>
+                            <input asp-for="FirstName" class="form-control" placeholder="Example: John" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
 
-        <br /><br />
+                        <div class="col-md-6">
+                            <label asp-for="LastName">Surname</label>
+                            <input asp-for="LastName" class="form-control" placeholder="Example: Doe" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
 
-        <label asp-for="FirstName">First Name</label>
-        <input asp-for="FirstName" class="form-control" placeholder="Example: John" />
+                    <br />
 
-        <br /><br />
+                    <label asp-for="Birthday">Birthday</label>
+                    <input type="date" asp-for="Birthday" class="form-control" />
+                    <span asp-validation-for="Birthday" class="text-danger"></span>
 
-        <label asp-for="LastName">Surname</label>
-        <input asp-for="LastName" class="form-control" placeholder="Example: Doe" />
+                    <br />
 
-        <br /><br />
+                    <div>
+                        <label asp-for="Gender" class="form-label mt-4">Gender</label>
+                        <select class="form-select" asp-for="Gender">
+                            <option></option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Rather not say</option>
+                        </select>
+                        <span asp-validation-for="Birthday" class="text-danger"></span>
+                    </div>
 
-        <label asp-for="Birthday">Birthday</label>
-        <input type="date" asp-for="Birthday" class="form-control" />
+                    <br />
 
-        <br />
+                    <label asp-for="PhoneNumber">Contact Number</label>
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="Example: 0123 456 7890" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
 
-        <div>
-            <label asp-for="Gender" class="form-label mt-4">Gender</label>
-            <select class="form-select" asp-for="Gender">
-                <option></option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Rather not say</option>
-            </select>
+                    <br /><br />
+
+                    <label asp-for="Password">Password</label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+
+                    <br />
+                    <br />
+
+                    <label asp-for="ConfirmPassword">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" class="form-control" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+
+                    <br />
+                    <br />
+
+                    <a asp-controller="Profile" asp-action="SignIn"
+                       class="btn btn-secondary">
+
+                        <i class="fa fa-arrow-left"></i>
+                        Return
+
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+
+                        <i class="fa fa-user-plus"></i>
+                        Register Account
+
+                    </button>
+
+                </form>
+
+            </div>
+
         </div>
-
-        <br />
-
-        <label asp-for="PhoneNumber">Contact Number</label>
-        <input asp-for="PhoneNumber" class="form-control" placeholder="Example: 0123 456 7890" />
-
-        <br /><br />
-
-        <label asp-for="Password">Password</label>
-        <input asp-for="Password" class="form-control" />
-
-        <br />
-        <br />
-
-        <label asp-for="ConfirmPassword">Confirm Password</label>
-        <input asp-for="ConfirmPassword" class="form-control" />
-
-        <br />
-        <br />
-
-        <a asp-controller="Profile" asp-action="SignIn"
-           class="btn btn-secondary">
-
-            <i class="fa fa-arrow-left"></i>
-            Return
-
-        </a>
-
-        <button type="submit" class="btn btn-primary">
-
-            <i class="fa fa-user-plus"></i>
-            Register Account
-
-        </button>
-
-    </form>
-
+    </div>
 </div>

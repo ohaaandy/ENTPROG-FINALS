@@ -6,32 +6,35 @@
 
         <div class="card-body">
 
-            <h4 class="card-title">
-                
+            <h2 class="card-title">
+
                 <i class="fa-solid fa-user"></i>
                 Account Log-In
-                
-            </h4>
+
+            </h2>
+            <hr />
 
             <div style="text-align: center">
             </div>
 
-            <div asp-validation-summary="All" class="text-danger"></div>
+            @* <div asp-validation-summary="All" class="text-danger"></div> //placed ALL under the txtbx instead*@
 
             <form asp-controller="Profile" asp-action="SignIn" method="post" asp-route-returnUrl="@Model.ReturnUrl">
 
                 <label asp-for="UserName">Username</label>
                 <input asp-for="UserName" class="form-control" />
-               
+                <span asp-validation-for="UserName" class="text-danger"></span>
+
                 <br /><br />
 
                 <label asp-for="Password">Password</label>
                 <input type="password" input asp-for="Password" class="form-control" />
-               
+                <span asp-validation-for="Password" class="text-danger"></span>
+
                 <br />
 
                 <div style="text-align: right">
-                    
+
                     <button type="submit" class="btn btn-primary">
 
                         Log-In
@@ -53,11 +56,11 @@
 
                 <i class="fa fa-user-plus"></i>
                 Sign-Up Here
-            
+
             </a>
 
         </div>
 
     </div>
 
-</div>
+</div>  
