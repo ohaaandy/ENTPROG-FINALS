@@ -1,36 +1,58 @@
 ﻿@model CreateEventViewModel
 
-<h2>Create New Event</h2>
+<div class="col-6 offset-3">
+    <div class="card text-dark border-dark mb-3" style="max-width: 100rem;">
+        <div class="card-body">
+            <h2 class="card-title">Create New Event</h2>
+            <hr />
 
-<form asp-action="CreateEvent" method="post">
-    <input type="hidden" asp-for="ClubID" />
-    <div class="form-group">
-        <label asp-for="EventName">Event Name</label>
-        <input asp-for="EventName" class="form-control" />
-        <span asp-validation-for="EventName" class="text-danger"></span>
+            <div style="text-align: left">
+            <form asp-action="CreateEvent" method="post">
+                <input type="hidden" asp-for="ClubID" />
+                <div class="form-group">
+                    <label asp-for="EventName">Event Name</label>
+                    <input asp-for="EventName" class="form-control" />
+                    <span asp-validation-for="EventName" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label asp-for="EventType">Event Type</label>
+                    <input asp-for="EventType" class="form-control" />
+                    <span asp-validation-for="EventType" class="text-danger"></span>
+                </div>
+                <br />
+
+                <div class="row">
+                    <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="DateTime">Date and Time</label>
+                        <input asp-for="DateTime" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="DateTime" class="text-danger"></span>
+                    </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Location">Location</label>
+                        <input asp-for="Location" class="form-control" />
+                        <span asp-validation-for="Location" class="text-danger"></span>
+                    </div>
+                    </div>
+                </div>
+
+                <br />
+                <div class="form-group">
+                    <label asp-for="Description">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <br />
+                <button type="submit" class="btn btn-primary">Create Event</button>
+            </form>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="EventType">Event Type</label>
-        <input asp-for="EventType" class="form-control" />
-        <span asp-validation-for="EventType" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="DateTime">Date and Time</label>
-        <input asp-for="DateTime" class="form-control" type="datetime-local" />
-        <span asp-validation-for="DateTime" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Location">Location</label>
-        <input asp-for="Location" class="form-control" />
-        <span asp-validation-for="Location" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Description">Description</label>
-        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Create Event</button>
-</form>
+</div>
 
 @section Scripts {
     @{

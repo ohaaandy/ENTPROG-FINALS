@@ -18,18 +18,29 @@
 
 @foreach (var eventItem in Model)
 {
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">@eventItem.EventName</h5>
-            <p class="card-text">Date: @eventItem.DateTime.ToString("yyyy-MM-dd HH:mm")</p>
-            <p class="card-text">Location: @eventItem.Location</p>
-            <p class="card-text">Description: @eventItem.Description</p>
-
-            <form asp-controller="Events" asp-action="JoinEvent" asp-route-eventId="@eventItem.EventID" method="post">
-                <button type="submit" class="btn btn-primary">Join Event</button>
-            </form>
-
-            <a asp-controller="Events" asp-action="Details" asp-route-id="@eventItem.EventID" class="btn btn-info">View Details</a>
+    <div class="d-flex justify-content-center">
+    <div class="card mb-3" style="width: 100rem;">
+        <div class="card-header bg-primary text-white">
+        <h3 class="card-title">@eventItem.EventName</h3>
         </div>
+        <div class="card-body">
+            <div class="d-flex">
+            <label class="card-text fw-bold me-2">Date: </label>
+            <p class="card-text me-5">@eventItem.DateTime.ToString("yyyy-MM-dd HH:mm")</p>
+            <label class="card-text fw-bold me-2">Location: </label>
+            <p class="card-text">@eventItem.Location</p>
+            </div>
+            <label class="card-text fw-bold me-2">Description: </label>
+            <p class="card-text d-flex">@eventItem.Description</p>
+
+            <div class="d-flex">
+                <form asp-controller="Events" asp-action="JoinEvent" asp-route-eventId="@eventItem.EventID" method="post" class="me-2">
+                    <button type="submit" class="btn btn-primary btn-lg">Join Event</button>
+                </form>
+
+                <a asp-controller="Events" asp-action="Details" asp-route-id="@eventItem.EventID" class="btn btn-info btn-lg">View Details</a>
+            </div>
+        </div>
+    </div>
     </div>
 }

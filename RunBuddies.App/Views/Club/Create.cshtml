@@ -2,58 +2,72 @@
 @{
     ViewData["Title"] = "Create Club";
 }
-<h2>Create Club</h2>
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label asp-for="ClubName" class="control-label"></label>
-        <input asp-for="ClubName" class="form-control" />
-        <span asp-validation-for="ClubName" class="text-danger"></span>
+<div class="col-6 offset-3">
+    <div class="card text-dark border-dark mb-3" style="max-width: 100rem;">
+        <div class="card-body">  
+            
+            <h2 class="card-title">Create Club</h2>
+            <hr />
+            <form asp-action="Create" method="post">
+                <div class="form-group">
+                    <label asp-for="ClubName" class="control-label"></label>
+                    <input asp-for="ClubName" class="form-control" />
+                    <span asp-validation-for="ClubName" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label asp-for="Location" class="control-label"></label>
+                    <select asp-for="Location" class="form-control">
+                        <option value="" disabled selected>Select City</option>
+                        <option value="Manila">Manila</option>
+                        <option value="Quezon City">Quezon City</option>
+                        <option value="Caloocan">Caloocan</option>
+                        <option value="Las Piñas">Las Piñas</option>
+                        <option value="Makati">Makati</option>
+                        <option value="Malabon">Malabon</option>
+                        <option value="Mandaluyong">Mandaluyong</option>
+                        <option value="Marikina">Marikina</option>
+                        <option value="Muntinlupa">Muntinlupa</option>
+                        <option value="Navotas">Navotas</option>
+                        <option value="Parañaque">Parañaque</option>
+                        <option value="Pasay">Pasay</option>
+                        <option value="Pasig">Pasig</option>
+                        <option value="San Juan">San Juan</option>
+                        <option value="Taguig">Taguig</option>
+                        <option value="Valenzuela">Valenzuela</option>
+                        <option value="Pateros">Pateros</option>
+                    </select>
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label asp-for="ContactEmail" class="control-label"></label>
+                    <input asp-for="ContactEmail" class="form-control" />
+                    <span asp-validation-for="ContactEmail" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label asp-for="CommunicationGroupLink" class="control-label"></label>
+                    <input asp-for="CommunicationGroupLink" class="form-control" />
+                    <span asp-validation-for="CommunicationGroupLink" class="text-danger"></span>
+                    <small class="form-text text-muted">Note: Enter a URL for your club's communication group (e.g., Discord, Messenger).</small>
+                </div>
+                <br />
+                <div class="button-group">
+                    <a href="@Url.Action("Results", "Search")" class="btn btn-secondary">Back</a>
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="Location" class="control-label"></label>
-        <select asp-for="Location" class="form-control">
-            <option value="" disabled selected>Select City</option>
-            <option value="Manila">Manila</option>
-            <option value="Quezon City">Quezon City</option>
-            <option value="Caloocan">Caloocan</option>
-            <option value="Las Piñas">Las Piñas</option>
-            <option value="Makati">Makati</option>
-            <option value="Malabon">Malabon</option>
-            <option value="Mandaluyong">Mandaluyong</option>
-            <option value="Marikina">Marikina</option>
-            <option value="Muntinlupa">Muntinlupa</option>
-            <option value="Navotas">Navotas</option>
-            <option value="Parañaque">Parañaque</option>
-            <option value="Pasay">Pasay</option>
-            <option value="Pasig">Pasig</option>
-            <option value="San Juan">San Juan</option>
-            <option value="Taguig">Taguig</option>
-            <option value="Valenzuela">Valenzuela</option>
-            <option value="Pateros">Pateros</option>
-        </select>
-        <span asp-validation-for="Location" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Description" class="control-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="ContactEmail" class="control-label"></label>
-        <input asp-for="ContactEmail" class="form-control" />
-        <span asp-validation-for="ContactEmail" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="CommunicationGroupLink" class="control-label"></label>
-        <input asp-for="CommunicationGroupLink" class="form-control" />
-        <span asp-validation-for="CommunicationGroupLink" class="text-danger"></span>
-        <small class="form-text text-muted">Note: Enter a URL for your club's communication group (e.g., Discord, Messenger).</small>
-    </div>
-    <div class="button-group">
-        <a href="@Url.Action("Results", "Search")" class="btn btn-secondary">Back</a>
-        <input type="submit" value="Create" class="btn btn-primary" />
-    </div>
-</form>
+</div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
