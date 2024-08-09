@@ -3,61 +3,70 @@
     var searchType = ViewBag.SearchType as string ?? "RunningBuddy";
 }
 
-<h2>LOOKING FOR...</h2>
-<select id="searchType" name="searchType" asp-for="@searchType">
-    <option value="RunningClub">Running Club</option>
-    <option value="RunningBuddy">Running Buddy</option>
-</select>
+<div class="col-6 offset-3">
+    <div class="card text-dark border-dark mb-3" style="max-width: 50rem;">
+        <div class="card-body">
+            <h3 class="card-title">LOOKING FOR...</h3>
+            <select id="searchType" name="searchType" asp-for="@searchType" class="form-control form-control-lg">
+                <option value="RunningClub">Running Club</option>
+                <option value="RunningBuddy">Running Buddy</option>
+            </select>
+            <br />
 
-<div id="runningBuddyOptions" style="@(searchType == "RunningBuddy" ? "" : "display: none;")">
-    <h2>ARE YOU...</h2>
-    <select id="level" name="level">
-        <option value="" disabled selected>Select Level</option>
-        <option value="Beginner">Beginner</option>
-        <option value="Intermediate">Intermediate</option>
-        <option value="Advanced">Advanced</option>
-    </select>
-</div>
+            <div id="runningBuddyOptions" style="@(searchType == "RunningBuddy" ? "" : "display: none;")">
+                <h3 class="card-title">ARE YOU...</h3>
+                <select id="level" name="level" class="form-control form-control-lg">
+                    <option value="" disabled selected>Select Level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+            <br />
 
-<h2>WHERE YOU AT...</h2>
-<select id="location" name="location">
-    <option value="" disabled selected>Select City</option>
-    <option value="Manila">Manila</option>
-    <option value="Quezon City">Quezon City</option>
-    <option value="Caloocan">Caloocan</option>
-    <option value="Las Piñas">Las Piñas</option>
-    <option value="Makati">Makati</option>
-    <option value="Malabon">Malabon</option>
-    <option value="Mandaluyong">Mandaluyong</option>
-    <option value="Marikina">Marikina</option>
-    <option value="Muntinlupa">Muntinlupa</option>
-    <option value="Navotas">Navotas</option>
-    <option value="Parañaque">Parañaque</option>
-    <option value="Pasay">Pasay</option>
-    <option value="Pasig">Pasig</option>
-    <option value="San Juan">San Juan</option>
-    <option value="Taguig">Taguig</option>
-    <option value="Valenzuela">Valenzuela</option>
-    <option value="Pateros">Pateros</option>
-</select>
+            <h3 class="card-title">WHERE YOU AT...</h3>
+            <select id="location" name="location" class="form-control form-control-lg">
+                <option value="" disabled selected>Select City</option>
+                <option value="Manila">Manila</option>
+                <option value="Quezon City">Quezon City</option>
+                <option value="Caloocan">Caloocan</option>
+                <option value="Las Piñas">Las Piñas</option>
+                <option value="Makati">Makati</option>
+                <option value="Malabon">Malabon</option>
+                <option value="Mandaluyong">Mandaluyong</option>
+                <option value="Marikina">Marikina</option>
+                <option value="Muntinlupa">Muntinlupa</option>
+                <option value="Navotas">Navotas</option>
+                <option value="Parañaque">Parañaque</option>
+                <option value="Pasay">Pasay</option>
+                <option value="Pasig">Pasig</option>
+                <option value="San Juan">San Juan</option>
+                <option value="Taguig">Taguig</option>
+                <option value="Valenzuela">Valenzuela</option>
+                <option value="Pateros">Pateros</option>
+            </select>
+            <br />
 
-<div id="runningBuddyDays" style="@(searchType == "RunningBuddy" ? "" : "display: none;")">
-    <h2>WHAT DAY YOU RUN?</h2>
-    <div id="runDays">
-        @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" })
-        {
-            <label class="day-btn">
-                <input type="checkbox" name="days" value="@day" />
-                <span>@day</span>
-            </label>
-        }
+            <div id="runningBuddyDays" style="@(searchType == "RunningBuddy" ? "" : "display: none;")">
+                <h3 class="card-title">WHAT DAY YOU RUN?</h3>
+                <div id="runDays">
+                    @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" })
+                    {
+                        <label class="day-btn">
+                            <input type="checkbox" name="days" value="@day" />
+                            <span>@day</span>
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <p></p>
+            <div>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary btn-lg">Back</a>
+                <button id="searchBtn" class="btn btn-primary btn-lg">Search</button>
+            </div>
+        </div>
     </div>
-</div>
-
-<p></p>
-<div>
-    <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Back</a>
-    <button id="searchBtn" class="btn btn-primary">Search</button>
 </div>
 
 @section Styles {
@@ -67,24 +76,29 @@
             gap: 10px;
             margin-bottom: 20px;
         }
+
         .day-btn {
             display: inline-block;
             cursor: pointer;
         }
-        .day-btn input[type="checkbox"] {
-            display: none;
-        }
-        .day-btn span {
-            display: inline-block;
-            padding: 5px 10px;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .day-btn input[type="checkbox"]:checked + span {
-            background-color: #007bff;
-            color: white;
-        }
+
+            .day-btn input[type="checkbox"] {
+                display: none;
+            }
+
+            .day-btn span {
+                display: inline-block;
+                padding: 5px 15px;
+                background-color: #f0f0f0;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                font-size: 1.2rem;
+            }
+
+            .day-btn input[type="checkbox"]:checked + span {
+                background-color: #007bff;
+                color: white;
+            }
     </style>
 }
 
@@ -106,10 +120,10 @@
                 var searchType = $('#searchType').val();
                 var level = searchType === "RunningBuddy" ? $('#level').val() : "";
                 var location = $('#location').val();
-                var days = searchType === "RunningBuddy" 
+                var days = searchType === "RunningBuddy"
                     ? $('input[name="days"]:checked').map(function () {
                         return $(this).val();
-                      }).get().join(',')
+                    }).get().join(',')
                     : "";
 
                 window.location.href = '@Url.Action("Results", "Search")' +
