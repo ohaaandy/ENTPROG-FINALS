@@ -5,6 +5,7 @@
 }
 
 <h2>My Running Buddies</h2>
+<hr />
 
 @if (Model.Buddies.Any())
 {
@@ -13,9 +14,12 @@
         {
             <div class="col-md-6 mb-4">
                 <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="card-title">@buddy.FullName</h4>
+                        <h6 class="card-subtitle mb-2">@buddy.RunnerLevel Runner</h6>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">@buddy.FullName</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">@buddy.RunnerLevel Runner</h6>
+                        
                         <p class="card-text">
                             <strong>Location:</strong> @buddy.Location<br>
                             <strong>Preferred Schedule:</strong> @buddy.PreferredSchedule<br>
@@ -23,6 +27,7 @@
                             <strong>Email:</strong> @buddy.Email<br>
                             <strong>Phone Number:</strong> @buddy.PhoneNumber
                         </p>
+                        <hr />
                         <div class="mb-3">
                             <strong>Contact:</strong><br>
                             <a href="mailto:@buddy.Email" class="card-link">Email</a>

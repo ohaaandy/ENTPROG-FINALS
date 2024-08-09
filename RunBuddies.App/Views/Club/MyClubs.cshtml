@@ -1,6 +1,7 @@
 ﻿@model List<ClubViewModel>
 
 <h2>My Clubs</h2>
+<hr />
 
 @if (Model.Any())
 {
@@ -9,9 +10,13 @@
         {
             <div class="col-md-4 mb-4">
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-header bg-primary text-white">
                         <h5 class="card-title">@club.ClubName</h5>
-                        <p class="card-text">Location: @club.Location</p>
+                     </div>
+                    <div class="card-body">
+                        <label class="card-text fw-bold me-2">Location: </label>
+                        <p class="card-text">@club.Location</p>
+                        <hr />
                         <p class="card-text">@(club.Description?.Length > 100 ? club.Description.Substring(0, 97) + "..." : club.Description)</p>
                         @if (club.IsModerator)
                         {
