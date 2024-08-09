@@ -2,17 +2,135 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="hero-section">
-    <div class="image-placeholder">
-        <!-- Replace with actual image -->
-        <img src="~/images/placeholder.jpg" alt="Hero Image">
+<div class="card; text-center" style="width: 100%;">
+    <img class="card-img-top" src="~/images/01.jpg" alt="Card image cap">
+    <div class="card-body">
+        <h2 class="card-title">Welcome to RunBuddies PH</h2>
+        <h5 class="card-text">Discover running partners, join local clubs, and be a part of a thriving running community today.</h5>
+        <a asp-controller="Search" asp-action="Filter" class="btn btn-primary btn-lg">Find My</a>
     </div>
-    <h1>LOREM IPSUM</h1>
-    <p>lorem ipsum dolor sit amet, consectetur adipiscing elit, pellentesque quis aliquet massa. mauris finibus nunc sit amet lacinia varius. nullam accumsan vehicula lectus et congue.</p>
-    <a asp-controller="Search" asp-action="Filter" class="btn btn-primary">Find My</a>
 </div>
 
-<div class="testimonials">
+<br />
+<br />
+<div class="features; text-center">
+    <h2>Features</h2>
+    <div class="row features">
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Find My Running Buddy
+                    </h3>
+                    <p class="card-text">
+                        Search for partners by location, schedule, and experience. Find someone who matches your pace and goals.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        Discover Running Club
+                    </h3>
+                    <p class="card-text">
+                        Locate local running clubs with current training programs, events, and social activities. Join clubs and connect with runners who share your interests.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Create and Join Events</h3>
+                    <p class="card-text">
+                        Participate in or organize running events. Whether it's a community run or a fun run, RunBuddies helps you stay active and engaged.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<br />
+<br />
+<div class="testimonials; text-center">
     <h2>Testimonials</h2>
-    <!-- Add testimonial content here -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- First Testimonial -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        A runner from Malate, Manila
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0">
+                            <p>
+                                As a beginner, finding experienced runners to guide me has been invaluable. RunBuddies made it easy to connect and learn.
+                            </p>
+                            <footer class="blockquote-footer"><cite title="Source Title">Gwen U.</cite></footer>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Testimonial -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        from Facebook
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0">
+                            <p>
+                                The events feature on RunBuddies are fantastic! I've participated in one and even inspired to organize one myself. It's so easy to use!
+                            </p>
+                            <footer class="blockquote-footer"><cite title="Source Title">Lee S.</cite></footer>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <!-- Third Testimonial -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        A testimony from a friend
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0">
+                            <p>
+                                Joining a local running club through RunBuddies has made running more enjoyable and social. I love the community spirit!
+                                </p>
+                            <footer class="blockquote-footer"><cite title="Source Title">anonymous</cite></footer>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fourth Testimonial -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        from Tiktok
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0">
+                            <p>
+                                I've made great friends and improved my running thanks to this amazing platform.
+                                </p>
+                            <footer class="blockquote-footer">Maria C. <cite title="Source Title">(ririruns on Tiktok)</cite></footer>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
