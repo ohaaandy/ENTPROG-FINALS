@@ -20,6 +20,7 @@ namespace RunBuddies.DataModel
         public DateOnly? Schedule { get; set; }
         public string? Location { get; set; }
         public int? Distance { get; set; }
+        public bool IsProfileComplete { get; set; }
         public ICollection<BuddyInvitation> SentBuddyInvitations { get; set; }
         public ICollection<BuddyInvitation> ReceivedBuddyInvitations { get; set; }
 

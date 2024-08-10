@@ -40,6 +40,11 @@ namespace RunBuddies.App.Controllers
                 Distance = user.Distance
             };
 
+            if (!user.IsProfileComplete)
+            {
+                ViewBag.Message = "Please complete your profile to continue.";
+            }
+
             return View(viewModel);
         }
 
@@ -66,7 +71,6 @@ namespace RunBuddies.App.Controllers
             user.Location = model.Location;
             if (model.PreferredDay.HasValue)
             {
-                // Create a DateOnly for the next occurrence of the selected day
                 var today = DateOnly.FromDateTime(DateTime.Today);
                 int daysUntilPreferred = ((int)model.PreferredDay.Value - (int)today.DayOfWeek + 7) % 7;
                 user.Schedule = today.AddDays(daysUntilPreferred);
@@ -76,6 +80,7 @@ namespace RunBuddies.App.Controllers
                 user.Schedule = null;
             }
             user.Distance = model.Distance;
+            user.IsProfileComplete = true;  // Set this to true after updating the profile
 
             var result = await userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -104,24 +109,33 @@ namespace RunBuddies.App.Controllers
         {
             if (ModelState.IsValid)
             {
-                User New = new();
+                User New = new()
+                {
+                    UserName = Model.UserName,
+                    Email = Model.Email,
+                    FirstName = Model.FirstName,
+                    LastName = Model.LastName,
+                    Birthday = Model.Birthday,
+                    Gender = Model.Gender,
+                    PhoneNumber = Model.PhoneNumber,
+                    IsProfileComplete = false  // Set this to false for new users
+                };
 
-                New.UserName = Model.UserName;
-                New.Email = Model.Email;
-                New.FirstName = Model.FirstName;
-                New.LastName = Model.LastName;
-                New.Birthday = Model.Birthday;
-                New.Gender = Model.Gender;
-                New.PhoneNumber = Model.PhoneNumber;
+                var result = await userManager.CreateAsync(New, Model.Password);
 
-                await userManager.CreateAsync(New, Model.Password);
+                if (result.Succeeded)
+                {
+                    await signInManager.SignInAsync(New, isPersistent: false);
+                    return RedirectToAction("Index", "Profile");
+                }
 
-                return RedirectToAction("SignIn", "Profile");
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
-            else
-            {
-                return View(Model);
-            }
+
+            return View(Model);
         }
 
         public IActionResult SignIn(string? returnURL)
@@ -140,7 +154,7 @@ namespace RunBuddies.App.Controllers
         {
             if (ModelState.IsValid)
             {
-                User? user = (User?)await userManager.FindByNameAsync(Model.UserName);
+                User? user = await userManager.FindByNameAsync(Model.UserName);
 
                 if (user != null)
                 {
@@ -148,6 +162,11 @@ namespace RunBuddies.App.Controllers
 
                     if (result.Succeeded)
                     {
+                        if (!user.IsProfileComplete)
+                        {
+                            return RedirectToAction("Index", "Profile");
+                        }
+
                         if (!string.IsNullOrEmpty(returnURL))
                             return LocalRedirect(returnURL);
 
@@ -156,14 +175,12 @@ namespace RunBuddies.App.Controllers
                     else
                     {
                         ModelState.AddModelError("Error", "Invalid Credentials");
-
                         return View(Model);
                     }
                 }
                 else
                 {
                     ModelState.AddModelError("Error", "Invalid Credentials");
-
                     return View(Model);
                 }
             }

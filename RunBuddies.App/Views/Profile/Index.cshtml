@@ -9,43 +9,46 @@
             <h2 class="card-title">My Profile</h2>
             <hr />
 
+            @if (!string.IsNullOrEmpty(ViewBag.Message))
+            {
+                <div class="alert alert-info mb-4">@ViewBag.Message</div>
+            }
+
             <div style="text-align: left">
-                <h5 class="card-subtitle">User Details</h5>
+                <h5 class="card-subtitle mb-3">User Details</h5>
                 <form asp-action="UpdateProfile" method="post">
 
-                    <div class="form-group">
-                        <label asp-for="UserName"></label>
+                    <div class="form-group mb-3">
+                        <label asp-for="UserName" class="form-label"></label>
                         <input asp-for="UserName" class="form-control" readonly />
                     </div>
-                    <br />
 
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="FirstName"></label>
+                                <label asp-for="FirstName" class="form-label"></label>
                                 <input asp-for="FirstName" class="form-control" required />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="LastName"></label>
+                                <label asp-for="LastName" class="form-label"></label>
                                 <input asp-for="LastName" class="form-control" required />
                             </div>
                         </div>
                     </div>
-                    <br />
 
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="Birthday"></label>
+                                <label asp-for="Birthday" class="form-label"></label>
                                 <input asp-for="Birthday" type="date" class="form-control" required />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="Gender"></label>
-                                <select asp-for="Gender" class="form-control" required>
+                                <label asp-for="Gender" class="form-label"></label>
+                                <select asp-for="Gender" class="form-select" required>
                                     <option value="">Select Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
@@ -54,15 +57,13 @@
                             </div>
                         </div>
                     </div>
-                    <br />
-                    <br />
 
-                    <h5 class="card-subtitle">User Preferences</h5>
-                    <div class="row">
+                    <h5 class="card-subtitle mb-3 mt-4">User Preferences</h5>
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="RunnerLevel"></label>
-                                <select asp-for="RunnerLevel" class="form-control">
+                                <label asp-for="RunnerLevel" class="form-label"></label>
+                                <select asp-for="RunnerLevel" class="form-select">
                                     <option value="">Select Level</option>
                                     <option value="Beginner">Beginner</option>
                                     <option value="Intermediate">Intermediate</option>
@@ -72,8 +73,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="PreferredDay">Preferred Schedule</label>
-                                <select asp-for="PreferredDay" class="form-control">
+                                <label asp-for="PreferredDay" class="form-label">Preferred Schedule</label>
+                                <select asp-for="PreferredDay" class="form-select">
                                     <option value="">Select Day</option>
                                     @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
                                     {
@@ -83,12 +84,11 @@
                             </div>
                         </div>
                     </div>
-                    <br />
-                    <div class="row">
+                    <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="Location"></label>
-                                <select asp-for="Location" class="form-control">
+                                <label asp-for="Location" class="form-label"></label>
+                                <select asp-for="Location" class="form-select">
                                     <option value="">Select City</option>
                                     <option value="Manila">Manila</option>
                                     <option value="Quezon City">Quezon City</option>
@@ -112,15 +112,15 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="Distance"></label>
+                                <label asp-for="Distance" class="form-label"></label>
                                 <input asp-for="Distance" type="number" class="form-control" />
                             </div>
                         </div>
                     </div>
-                    <br />
 
-
-                    <button type="submit" class="btn btn-primary btn-lg">Update Profile</button>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">Update Profile</button>
+                    </div>
 
                 </form>
             </div>

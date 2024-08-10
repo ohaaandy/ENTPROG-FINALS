@@ -15,7 +15,7 @@ namespace RunBuddies.App
 
             builder.Services.AddDbContext<AppDBContext>(opts =>
             {
-                opts.UseSqlServer(builder.Configuration.GetConnectionString("Andy"))
+                opts.UseSqlServer(builder.Configuration.GetConnectionString("Yash"))
                     .EnableSensitiveDataLogging()
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
 
